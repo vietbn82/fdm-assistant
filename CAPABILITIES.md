@@ -47,9 +47,23 @@ chặn và hỏi bạn (đã gặp ở phiên trước).
 
 ---
 
-## 3. Bạn bật gì để tôi tự động hơn
+## 3. Tự động hoá — 3.1 đến 3.5 đã BẬT (2026-08-22)
 
-Xếp theo tỉ lệ lợi ích / công sức.
+| # | Hạng mục | Trạng thái | File |
+|---|---|---|---|
+| 3.1 | `CLAUDE.md` tự nạp mỗi phiên | 🟢 bật | `CLAUDE.md` |
+| 3.2 | git + `.gitignore` chặn rò token | 🟢 bật | `.gitignore` |
+| 3.3 | Allowlist quyền lệnh chỉ đọc | 🟢 bật | `.claude/settings.json` |
+| 3.4 | Slash command | 🟢 bật | `.claude/commands/` |
+| 3.5 | Hook chặn ghi `system\` + báo trạng thái | 🟢 bật, đã test | `.claude/hooks/` |
+| 3.6 | Cập nhật `Filaments.md` khi đổi cuộn | ⏳ việc thủ công của bạn | — |
+
+Lệnh dùng được ngay: `/audit`, `/apply`, `/preset <tên>`, `/newfilament`.
+
+⏳ Hook chỉ nạp khi Claude Code khởi động lại phiên, hoặc bạn mở `/hooks` một
+lần. Phiên hiện tại chưa có `.claude/` lúc bắt đầu nên chưa theo dõi thư mục đó.
+
+Phần mô tả chi tiết từng hạng mục giữ lại bên dưới để tham chiếu.
 
 ### 3.1 `CLAUDE.md` — biến `WORKING_RULES.md` thành luật thật sự ⭐ cao nhất
 

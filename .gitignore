@@ -1,0 +1,22 @@
+# The GitHub remote is PUBLIC. Nothing containing cloud tokens, device ids, or
+# account identifiers may ever be committed.
+
+# Slicer app state - contains encrypted cloud tokens under "anycubic_cloud"
+# and "anycubic_remote_printing.current_device_id"
+*.conf
+*.conf.bak
+AnycubicSlicerNext.conf*
+
+# Preset backups written by acslicer_tune.py
+user_backup-*/
+
+# Slicer logs - contain MQTT topics, device ids, file paths
+log/
+crash/
+
+# Personal overrides, never shared
+.claude/settings.local.json
+
+# Python
+__pycache__/
+*.py[cod]
