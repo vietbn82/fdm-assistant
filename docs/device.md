@@ -1,9 +1,34 @@
 # Máy in và phần mềm
 
-Thông tin về **phần cứng** — thứ tồn tại ngoài đời, sửa preset không đổi được.
+## Nguồn số liệu — đọc trước
 
-Giá trị cấu hình đang đặt: `profiles/printer.md`.
-Cách slicer lưu preset: `docs/preset-model.md`.
+Mọi con số ở trang này đọc từ preset của slicer, **không phải đo trực tiếp**.
+Phân biệt hai loại, vì nó quyết định có nên sửa hay không:
+
+| | Ví dụ | Sửa preset thì sao |
+|---|---|---|
+| **Sự thật phần cứng** | vùng in, đường kính nozzle, trần động học | không đổi được thực tế; sửa sai chỉ làm slicer tính sai hoặc đâm nozzle |
+| **Lựa chọn tinh chỉnh** | retraction, z-hop, tốc độ, flush | giá trị **chính là** setting; đây mới là thứ đáng chỉnh |
+
+Trang này chỉ chứa loại thứ nhất. Loại thứ hai ở `profiles/`:
+
+- Giá trị cấu hình đang đặt — `profiles/printer.md`
+- Cách slicer lưu preset — `docs/preset-model.md`
+
+🔵 Trần động học là **khai báo phía slicer**, giới hạn thật nằm trong
+`printer.cfg` của Klipper trên máy. Preset đặt `emit_machine_limits_to_gcode = 1`
+nên slicer còn ghi `SET_VELOCITY_LIMIT` vào đầu gcode để ép máy theo. Klipper kẹp
+`VELOCITY` và `ACCEL` về mức trong config của nó, nên khai cao hơn thực tế chỉ
+làm **ước tính thời gian sai**, không hỏng gì.
+
+Trong bốn con số, chỉ **gia tốc** và **jerk** đáng đối chiếu. Tốc độ 450 mm/s gần
+như không chạm tới: trần flow đã giới hạn ở ~166 mm/s khi đùn nhựa, nên 450 chỉ
+áp dụng cho travel.
+
+🟢 Jerk 20 map sang `square_corner_velocity` — cao gấp 4 lần mặc định Klipper (5),
+và đây là tham số Klipper **không** kẹp. Triệu chứng nếu quá cao là ringing quanh
+góc và lỗ. Viet xác nhận **không thấy ringing**, nên để nguyên. Xem A6 trong
+`TODO.md` nếu sau này muốn đối chiếu cho đủ.
 
 ---
 
@@ -44,20 +69,3 @@ thị trong slicer thành vô nghĩa.
 | Region / Language / Đơn vị | Global / en_GB / mm |
 | Tài khoản cloud | user id `855643`, đã đăng nhập |
 
----
-
-## Nguồn số liệu
-
-Mọi con số trên đọc từ preset của slicer, không phải đo trực tiếp. Phân biệt hai
-loại — quan trọng khi quyết định có nên sửa:
-
-| | Ví dụ | Sửa preset thì sao |
-|---|---|---|
-| **Sự thật phần cứng** | vùng in, đường kính nozzle, trần động học | không đổi được thực tế; sửa sai chỉ làm slicer tính sai hoặc đâm nozzle |
-| **Lựa chọn tinh chỉnh** | retraction, z-hop, tốc độ, flush | giá trị **chính là** setting; đây mới là thứ đáng chỉnh |
-
-Trang này chỉ chứa loại thứ nhất. Loại thứ hai ở `profiles/`.
-
-🟡 Trần động học nằm ở nhóm một nhưng có một lưu ý: nó là **khai báo phía
-slicer**, giới hạn thật nằm trong config Klipper trên máy. Hai bên có thể lệch —
-chưa ai đối chiếu.

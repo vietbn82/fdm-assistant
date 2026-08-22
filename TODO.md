@@ -42,6 +42,23 @@ Thứ tôi không thể tự biết. File sai thì mọi tư vấn nhiệt độ
 sai theo. Nên ghi thêm: thương hiệu chính xác, mã màu hex, ngày mở túi, đã sấy
 chưa. Ẩm là nguyên nhân số một của lỗi in PLA mà nhìn giống lỗi setting.
 
+### A6 🔵 Đối chiếu trần động học slicer ↔ Klipper — ưu tiên thấp
+Slicer khai 450 mm/s, 10000 mm/s² accel, jerk 20. Giới hạn thật nằm trong
+`printer.cfg` trên máy. `emit_machine_limits_to_gcode = 1` nên slicer ghi
+`SET_VELOCITY_LIMIT` vào đầu gcode.
+
+🟢 **Không gấp.** Kịch bản xấu nhất chỉ là ước tính thời gian sai — Klipper tự
+kẹp `VELOCITY`/`ACCEL`. Rủi ro duy nhất là `square_corner_velocity = 20` (Klipper
+không kẹp tham số này, mặc định của nó là 5), nhưng Viet xác nhận không thấy
+ringing nên thực tế ổn.
+
+Nếu sau này muốn làm cho đủ:
+1. Slice bất kỳ model nào, mở gcode, tìm `SET_VELOCITY_LIMIT` trong ~100 dòng đầu
+2. Lấy `printer.cfg` thật: `http://<IP máy in>:7125/printer/objects/query?configfile`
+   🟡 Máy nối qua cloud MQTT chứ không phải LAN — chưa chắc Moonraker mở cổng
+3. Không truy cập được thì so thời gian in thật vs ước tính trên bản in >1 giờ;
+   lệch >15% mà không do flow cap = đang bị kẹp
+
 ---
 
 ## B. Cần Viet chốt (tôi làm được ngay khi có quyết định)
