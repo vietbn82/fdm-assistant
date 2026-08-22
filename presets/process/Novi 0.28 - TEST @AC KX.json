@@ -1,0 +1,13 @@
+{
+    "bottom_shell_layers": "2",
+    "brim_type": "no_brim",
+    "from": "User",
+    "inherits": "0.28mm Standard @Anycubic Kobra X 0.4 nozzle",
+    "is_custom_defined": "0",
+    "name": "Novi 0.28 - TEST @AC KX",
+    "print_settings_id": "Novi 0.28 - TEST @AC KX",
+    "sparse_infill_density": "5%",
+    "sparse_infill_pattern": "lightning",
+    "top_shell_layers": "2",
+    "version": "1.3.2606.12"
+}

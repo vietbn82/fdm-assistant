@@ -1,15 +1,9 @@
 {
     "filament_max_volumetric_speed": [
-        "15"
-    ],
-    "filament_retraction_length": [
-        "nil"
+        "13"
     ],
     "filament_settings_id": [
         "PLA Generic@KX 0.4"
-    ],
-    "filament_wipe_distance": [
-        "nil"
     ],
     "from": "User",
     "inherits": "Anycubic PLA @Anycubic Kobra X 0.4 nozzle",
@@ -27,5 +21,5 @@
     "textured_plate_temp_initial_layer": [
         "50"
     ],
-    "version": "1.3.2608.20"
+    "version": "1.3.2606.12"
 }
