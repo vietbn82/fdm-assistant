@@ -8,6 +8,7 @@ application code. The presets themselves live outside the repo, in
 
 | File | When |
 |---|---|
+| `TODO.md` | first, every session — everything still open, and who it is blocked on |
 | `WORKING_RULES.md` | before any write to a preset — the safety sequence and the ask/don't-ask table are binding |
 | `Device_Software.md` | printer limits, data layout, known vendor-profile bugs |
 | `Filaments.md` | what is actually loaded in the four slots right now |

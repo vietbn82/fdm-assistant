@@ -156,10 +156,5 @@ setting.
 
 ## 4. Việc còn treo
 
-| Việc | Chờ ai |
-|---|---|
-| Flow test `BBL PLA Lite` ở 15 mm³/s | Viet in và xem thành wall |
-| Chốt bật/tắt các mục 3.1 → 3.5 | Viet |
-| Flush matrix 4×4 cho Red/White/Black/Cyan | Viet xác nhận có in 4 màu |
-| `0.12 mm High Quality`: bottom shell 3 layer = 0.36 mm | Viet quyết |
-| Slot 2 Generic PLA chưa có preset | Viet quyết |
+Xem `TODO.md`. Mục A là việc chỉ bạn làm được (in thử, đổi cuộn), mục B là các
+quyết định đang chặn tôi, mục C là hàng đợi của tôi.

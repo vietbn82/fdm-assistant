@@ -91,9 +91,7 @@ lọc bỏ mọi key thuộc `anycubic_cloud` và `anycubic_remote_printing`.
 
 ## 10. Trạng thái đang chờ
 
-| Việc | Trạng thái | Ai |
-|---|---|---|
-| Flow test xác nhận `BBL PLA Lite` ở 15 mm³/s | ⏳ chờ in | Viet |
-| Cấu hình flush matrix 4×4 cho 4 màu | 📝 chưa bắt đầu | cần Viet chốt |
-| `0.12 mm High Quality` bottom shell 0.36 mm (3 layer) | 📝 chờ quyết định | Viet |
-| Slot 2 (Generic PLA trắng) chưa có filament preset riêng | 📝 chưa bắt đầu | cần Viet chốt |
+Xem `TODO.md` — nguồn duy nhất. Đừng chép danh sách vào đây, hai bản sẽ lệch nhau.
+
+Mỗi phiên: đọc `TODO.md` trước khi đề xuất việc mới. Xong việc nào thì chuyển
+nó xuống mục D trong cùng lượt, đừng để tích lại.
