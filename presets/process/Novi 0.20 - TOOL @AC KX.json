@@ -1,5 +1,7 @@
 {
     "bottom_shell_layers": "4",
+    "flush_into_infill": "1",
+    "flush_into_objects": "1",
     "from": "User",
     "inherits": "0.20mm Standard @Anycubic Kobra X 0.4 nozzle",
     "is_custom_defined": "0",
