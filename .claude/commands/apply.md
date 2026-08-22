@@ -24,9 +24,10 @@ status and ask which IDs to run.
    inside `tools/acslicer_tune.py`.
 5. **Verify** with `python tools/acslicer_tune.py --audit` — the change should
    not introduce a new finding.
-6. **Move the applied entries** out of their group and into the
-   "Đã áp dụng" section at the bottom of `PENDING_APPLY.md`, with the date and the
-   backup path. Update `TODO.md` if an entry closes an item there.
+6. **Record what was applied.** Remove the entries from `PENDING_APPLY.md` and
+   write them into `CHANGELOG.md` under today's date, with the backup path and
+   why each change was made. Close anything in `TODO.md` they resolve, and
+   update the matching file in `profiles/` so it still describes reality.
 7. **Report** the backup path and every changed key as `old -> new`.
 
 ❌ Do not commit. Say what changed and stop.

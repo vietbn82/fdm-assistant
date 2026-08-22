@@ -25,7 +25,7 @@ rather than trusting memory of it.
 |---|---|
 | `profiles/printer.md` | machine-tier values in effect |
 | `profiles/filament.md` | the four loaded spools and their presets — **the user maintains this** |
-| `profiles/process.md` | the seven process presets and the FIG / TOOL / TEST proposal |
+| `profiles/process.md` | the three purpose-based process presets |
 
 **Root — working files.**
 
@@ -33,6 +33,7 @@ rather than trusting memory of it.
 |---|---|
 | `TODO.md` | first, every session — open decisions and who they are blocked on |
 | `PENDING_APPLY.md` | preset changes proposed but not written. Nothing here is applied until the user names the IDs |
+| `CHANGELOG.md` | what has already been done. Write finished work here rather than letting it pile up in `TODO.md` |
 
 ## Non-negotiable
 

@@ -49,9 +49,18 @@ def log(msg):
         pass
 
 
+# Launched by pythonw.exe, which has no console of its own, so every child
+# process would otherwise pop up its own window and steal focus mid-work.
+NO_WINDOW = getattr(subprocess, "CREATE_NO_WINDOW", 0x08000000) if os.name == "nt" else 0
+
+
+def run(args, cwd=None, timeout=120):
+    return subprocess.run(args, cwd=cwd, capture_output=True, text=True,
+                          timeout=timeout, creationflags=NO_WINDOW)
+
+
 def git(*args, check=True):
-    r = subprocess.run(["git", *args], cwd=REPO, capture_output=True,
-                       text=True, timeout=120)
+    r = run(["git", *args], cwd=REPO)
     if check and r.returncode != 0:
         raise RuntimeError(f"git {' '.join(args)} -> {r.returncode}: "
                            f"{r.stderr.strip()}")
@@ -59,8 +68,7 @@ def git(*args, check=True):
 
 
 def slicer_running():
-    r = subprocess.run(["tasklist", "/FI", f"IMAGENAME eq {PROCESS}", "/NH"],
-                       capture_output=True, text=True, timeout=30)
+    r = run(["tasklist", "/FI", f"IMAGENAME eq {PROCESS}", "/NH"], timeout=30)
     return PROCESS.lower() in r.stdout.lower()
 
 

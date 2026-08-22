@@ -10,6 +10,7 @@ Sửa thẳng vào file này. Claude đọc lại mỗi phiên qua `CLAUDE.md`.
 |---|---|---|---|
 | `TODO.md` | quyết định còn treo — đọc đầu mỗi phiên | thường xuyên | cả hai |
 | `PENDING_APPLY.md` | thao tác preset chờ duyệt | thường xuyên | Claude ghi, Viet duyệt |
+| `CHANGELOG.md` | việc đã xong, mới nhất lên trên | mỗi lần xong việc | Claude |
 | `presets/` | bản sao preset thật, để có lịch sử git | tự động | ❌ không sửa tay — sinh ra từ `--export` |
 | `profiles/` | trạng thái máy hiện tại | theo mỗi lần chỉnh máy | cả hai |
 | `profiles/filament.md` | cuộn nhựa đang nạp | mỗi lần đổi cuộn | **Viet** — Claude không tự biết được |
@@ -101,4 +102,4 @@ Không in ra, không đưa vào `.md`, không commit. Trích `.conf` thì lọc 
 ## 8. Việc còn treo
 
 `TODO.md` là nguồn duy nhất. Đừng chép danh sách sang chỗ khác, hai bản sẽ lệch.
-Xong việc nào thì chuyển xuống mục D trong cùng lượt.
+Xong việc nào thì chuyển sang `CHANGELOG.md` trong cùng lượt, đừng để tích lại.

@@ -45,6 +45,7 @@ Start with `docs/working-rules.md`. Everything else follows from it.
 CLAUDE.md            project context, auto-loaded by Claude Code
 TODO.md              open decisions, grouped by who they are blocked on
 PENDING_APPLY.md     proposed preset changes — nothing applied until approved by ID
+CHANGELOG.md         what has been done, newest first
 
 docs/                stable reference — rarely changes
   working-rules.md   how Viet and Claude work together — binding, read first
@@ -56,7 +57,7 @@ docs/                stable reference — rarely changes
 profiles/            live state — changes with the printer setup
   printer.md         machine-tier values in effect
   filament.md        the four loaded spools and their presets
-  process.md         the seven process presets, FIG / TOOL / TEST proposal
+  process.md         the three purpose-based process presets
 
 presets/             mirror of the live store, written by --export. Do not hand-edit.
 tools/
