@@ -1,0 +1,13 @@
+{
+    "from": "User",
+    "inherits": "0.20mm Standard @Anycubic Kobra X 0.4 nozzle",
+    "initial_layer_speed": "35",
+    "ironing_flow": "12%",
+    "ironing_spacing": "0.1",
+    "ironing_type": "top",
+    "is_custom_defined": "0",
+    "name": "0.20mm Standard @AC KX - Copy",
+    "print_settings_id": "0.20mm Standard @AC KX - Copy",
+    "sparse_infill_pattern": "honeycomb",
+    "version": "1.3.2606.12"
+}

@@ -1,0 +1,11 @@
+{
+    "from": "User",
+    "inherits": "Anycubic Kobra X 0.4 nozzle",
+    "is_custom_defined": "0",
+    "name": "Anycubic Kobra X 0.4 nozzle - Copy",
+    "printer_settings_id": "Anycubic Kobra X 0.4 nozzle - Copy",
+    "version": "1.3.2606.12",
+    "z_hop_types": [
+        "Auto Lift"
+    ]
+}
