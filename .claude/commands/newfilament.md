@@ -17,9 +17,9 @@ $ARGUMENTS says otherwise.
 4. **Be conservative on flow.** Start at the parent's
    `filament_max_volumetric_speed`. Do not raise it on spec-sheet numbers —
    raising it is a separate decision that needs a flow test, per
-   `WORKING_RULES.md` section 3.
+   `docs/working-rules.md` section 3.
 5. **Write it** to `%APPDATA%\AnycubicSlicerNext\user\855643\filament\`, with a
    matching `.info` sidecar (copy an existing one, set `updated_time` to now,
    keep `base_id` from the parent). Slicer must be closed first.
 6. **Run `--audit`** on the result before reporting done.
-7. **Update `Filaments.md`** with the new slot contents.
+7. **Update `profiles/filament.md`** with the new slot contents.

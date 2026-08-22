@@ -1,39 +1,64 @@
 # Anycubic Kobra X — slicer config assistant
 
 This repo manages **Anycubic Slicer Next presets for a Kobra X 0.4**, not
-application code. The presets themselves live outside the repo, in
+application code. The presets live outside the repo, in
 `%APPDATA%\AnycubicSlicerNext\`.
 
-## Read these before acting
+## Where things are
 
-| File | When |
+Two doc trees, split by how often they change:
+
+**`docs/` — stable reference.** Changes rarely; treat as background knowledge.
+
+| File | Read it when |
 |---|---|
-| `TODO.md` | first, every session — everything still open, and who it is blocked on |
-| `WORKING_RULES.md` | before any write to a preset — the safety sequence and the ask/don't-ask table are binding |
-| `Device_Software.md` | printer limits, data layout, known vendor-profile bugs |
-| `Filaments.md` | what is actually loaded in the four slots right now |
-| `PRINT_PROFILES.md` | the three print purposes and which preset serves each |
-| `README.md` | how `acslicer_tune.py` works |
-| `CAPABILITIES.md` | what is automated and what is still manual |
+| `docs/working-rules.md` | before any preset write — the procedure and the ask/don't-ask table are binding |
+| `docs/preset-model.md` | how the store is laid out, the four file traps, which tier owns which setting |
+| `docs/device.md` | printer hardware: build volume, nozzle, kinematic ceilings |
+| `docs/tool.md` | `tools/acslicer_tune.py` reference |
+| `docs/capabilities.md` | what is automated, what stays manual |
+
+**`profiles/` — live state.** Changes whenever the printer setup changes. Re-read
+rather than trusting memory of it.
+
+| File | Holds |
+|---|---|
+| `profiles/printer.md` | machine-tier values in effect |
+| `profiles/filament.md` | the four loaded spools and their presets — **the user maintains this** |
+| `profiles/process.md` | the seven process presets and the FIG / TOOL / TEST proposal |
+
+**Root — working files.**
+
+| File | Read it when |
+|---|---|
+| `TODO.md` | first, every session — open decisions and who they are blocked on |
+| `PENDING_APPLY.md` | preset changes proposed but not written. Nothing here is applied until the user names the IDs |
 
 ## Non-negotiable
 
 1. **Close the slicer before writing presets.** It holds them in memory and
    flushes on exit, erasing outside edits. Check with `Get-Process`.
-2. **Back up `user\` before every write.** `acslicer_tune.py` does this; if you
-   write by hand, do it yourself.
+2. **Back up `user\` before every write.** `tools/acslicer_tune.py` does this;
+   by hand, do it yourself.
 3. **Bump `updated_time` in the `.info` sidecar** of any preset JSON you edit,
    or cloud sync treats the file as stale and reverts it.
-4. **Never write to `system\`.** A PreToolUse hook blocks it. Copy into
-   `user\` and edit the copy.
-5. **Never write `.conf`** unless you recompute the trailing MD5. It contains
-   cloud tokens — filter `anycubic_cloud` and `anycubic_remote_printing` out of
-   anything you print or commit. The GitHub remote is **public**.
+4. **Never write to `system\`.** A PreToolUse hook blocks it. Copy into `user\`
+   and edit the copy.
+5. **Never write `.conf`** unless you recompute the trailing MD5. It holds cloud
+   tokens — strip `anycubic_cloud` and `anycubic_remote_printing` from anything
+   you print or commit. **The GitHub remote is public.**
+6. **Never write a preset the user has not approved by ID.** Findings and ideas
+   go into `PENDING_APPLY.md` as proposals. `/apply P1 P4` is the only path from
+   proposal to disk.
+7. **Never commit or push on your own.** Not after finishing a task, not to
+   "save progress", not because the tree is clean. Make the edits, say what
+   changed, and stop. `git add`, `git commit`, `git push` happen only when the
+   user asks in that turn — staging counts. Asking first is fine; assuming is not.
 
 ## Preset model
 
 A user preset stores only changed keys plus `"inherits": "<parent>"`. Effective
-value = the flattened chain. Two traps:
+value = the flattened chain. Two parsing traps *(full list: `docs/preset-model.md` §2)*:
 
 - `filament\base\X.json` shares its `"name"` with `filament\X.json`. The
   top-level file is the live preset; `base` must never win the index.
@@ -41,17 +66,20 @@ value = the flattened chain. Two traps:
 
 ## Put values at the right layer
 
-- Flow ceiling → **filament** preset
-- Kinematic limits → **machine** preset
-- Geometry and intent → **process** preset
+Flow ceiling → **filament**. Kinematic limits → **machine**. Geometry and
+intent → **process**.
 
-Never clamp a process speed to one filament's flow cap; the slicer already
-enforces that at slice time, and the pin outlives the filament.
+Never clamp a process speed to one filament's flow cap. The slicer enforces it
+at slice time anyway, and the pin outlives the filament.
 
 ## Answering
 
-Vietnamese unless asked otherwise. Keep technical terms, key names, preset
-names, CLI commands and error strings verbatim — never translate them.
-Bullets and tables over prose. Status icons: 🟢 done 🔴 error 🟡 risk
+Vietnamese unless the user writes English. Keep technical terms, key names,
+preset names, CLI commands and error strings verbatim — never translate them.
+Tables and bullets over prose; be short. Icons: 🟢 done 🔴 error 🟡 risk
 🔵 info 📝 todo ⏳ blocked ❌ don't. End every reply with an
 **⚠️ ACTION REQUIRED** section, or "None".
+
+Docs language: `docs/` is Vietnamese (the user reads it). `CLAUDE.md`,
+`.claude/**` and `README.md` stay English — model instructions and a public
+front page.

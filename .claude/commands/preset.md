@@ -4,7 +4,7 @@ description: Show one preset's fully resolved values and what it overrides from 
 
 Show the preset named in $ARGUMENTS.
 
-1. `python acslicer_tune.py --show "$ARGUMENTS"` for the resolved values.
+1. `python tools/acslicer_tune.py --show "$ARGUMENTS"` for the resolved values.
    If the name is not found, run `--list` and suggest the closest matches.
 2. Also read the raw user JSON so you can separate the two things:
    - **what this preset actually sets** (its own keys)

@@ -2,9 +2,9 @@
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
     "allow": [
-      "Bash(python acslicer_tune.py --list)",
-      "Bash(python acslicer_tune.py --audit*)",
-      "Bash(python acslicer_tune.py --show*)",
+      "Bash(python tools/acslicer_tune.py --list)",
+      "Bash(python tools/acslicer_tune.py --audit*)",
+      "Bash(python tools/acslicer_tune.py --show*)",
       "Bash(git status*)",
       "Bash(git log*)",
       "Bash(git diff*)",
@@ -12,9 +12,14 @@
       "PowerShell(Get-Process*)"
     ],
     "ask": [
-      "Bash(python acslicer_tune.py --fix*)",
-      "Bash(python acslicer_tune.py --set*)",
-      "Bash(git push*)"
+      "Bash(python tools/acslicer_tune.py --fix*)",
+      "Bash(python tools/acslicer_tune.py --set*)",
+      "Bash(git add*)",
+      "Bash(git commit*)",
+      "Bash(git push*)",
+      "PowerShell(git add*)",
+      "PowerShell(git commit*)",
+      "PowerShell(git push*)"
     ],
     "deny": [
       "Edit(//C/Users/*/AppData/Roaming/AnycubicSlicerNext/system/**)",
