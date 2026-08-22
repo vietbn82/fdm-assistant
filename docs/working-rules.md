@@ -10,6 +10,7 @@ Sửa thẳng vào file này. Claude đọc lại mỗi phiên qua `CLAUDE.md`.
 |---|---|---|---|
 | `TODO.md` | quyết định còn treo — đọc đầu mỗi phiên | thường xuyên | cả hai |
 | `PENDING_APPLY.md` | thao tác preset chờ duyệt | thường xuyên | Claude ghi, Viet duyệt |
+| `presets/` | bản sao preset thật, để có lịch sử git | tự động | ❌ không sửa tay — sinh ra từ `--export` |
 | `profiles/` | trạng thái máy hiện tại | theo mỗi lần chỉnh máy | cả hai |
 | `profiles/filament.md` | cuộn nhựa đang nạp | mỗi lần đổi cuộn | **Viet** — Claude không tự biết được |
 | `docs/` | kiến thức nền, quy tắc | hiếm | cả hai |
@@ -25,7 +26,7 @@ liệu mô tả trạng thái máy hiện tại thuộc `profiles/`; kiến th�
 ## 2. Quy trình ghi preset
 
 Bắt buộc, không ngoại lệ. Bốn cái bẫy đằng sau quy trình này ở
-`docs/preset-model.md` mục 2.
+`docs/preset-model.md` mục 5.
 
 1. **Kiểm tra slicer đã đóng.** Đang chạy thì dừng, báo Viet đóng. Không tự kill
    process trừ khi được cho phép trong chính lượt đó.
@@ -44,7 +45,8 @@ Bắt buộc, không ngoại lệ. Bốn cái bẫy đằng sau quy trình này 
 | Tạo hoặc xoá preset | ⚠️ hỏi trước |
 | Ghi `.conf` | ⚠️ hỏi, và phải tính lại MD5 |
 | Sửa `system\` | ❌ không bao giờ — hook chặn |
-| `git add` / `commit` / `push` | ❌ không tự làm, kể cả khi vừa xong việc |
+| `git add` / `commit` / `push` cho `docs/`, `tools/`, `.claude/`, file gốc | ❌ không tự làm, kể cả khi vừa xong việc |
+| Commit + push `presets/` | ✅ tự làm, **chỉ qua `tools/preset_autocommit.py`** |
 
 ## 4. Đặt giá trị đúng tầng
 
@@ -56,7 +58,7 @@ Bắt buộc, không ngoại lệ. Bốn cái bẫy đằng sau quy trình này 
 
 Bảng đầy đủ và các trường hợp dễ nhầm: `docs/preset-model.md` mục 3.
 
-❌ Không kẹp speed của process theo trần flow của một loại nhựa — slicer đã tự
+❌ Không hạ speed của process cho khớp trần flow của một loại nhựa — slicer đã tự
 enforce lúc slice, mà cái pin đó sống lâu hơn cuộn nhựa.
 
 ❌ Không pin một key vốn đang kế thừa chỉ để "cho chắc". Preset user càng mỏng

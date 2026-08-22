@@ -40,8 +40,8 @@ Chỉ đổi `z_hop_types` → `Auto Lift`. Ngoài ra y hệt stock.
 | `retract_restart_extra` | 0 | 0 | 🟢 đã sửa từ −0.05 |
 | `z_hop` | 0.4 | 0.4 | 🟢 đã sửa từ 0.1 |
 
-🟢 Hai dòng cuối đã sửa ở phiên trước: `retract_restart_extra` âm gây đùn thiếu
-sau mỗi lần retract; `z_hop = 0.1` nhỏ hơn chính lớp nó cần vượt qua nên nozzle
-vẫn va.
+Hai dòng cuối từng bị đặt sai và đã trả về mặc định: `retract_restart_extra` âm
+gây đùn thiếu sau mỗi lần retract, `z_hop = 0.1` nhỏ hơn chính lớp nó cần vượt
+qua nên nozzle vẫn va.
 
 ⏳ Chưa xác nhận các giá trị này còn nguyên sau khi mở lại slicer — A2 trong `TODO.md`.

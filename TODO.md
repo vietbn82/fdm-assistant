@@ -48,8 +48,8 @@ Slicer khai 450 mm/s, 10000 mm/s² accel, jerk 20. Giới hạn thật nằm tro
 `SET_VELOCITY_LIMIT` vào đầu gcode.
 
 🟢 **Không gấp.** Kịch bản xấu nhất chỉ là ước tính thời gian sai — Klipper tự
-kẹp `VELOCITY`/`ACCEL`. Rủi ro duy nhất là `square_corner_velocity = 20` (Klipper
-không kẹp tham số này, mặc định của nó là 5), nhưng Viet xác nhận không thấy
+hạ `VELOCITY`/`ACCEL` xuống. Rủi ro duy nhất là `square_corner_velocity = 20` (Klipper
+không hạ tham số này, mặc định của nó là 5), nhưng Viet xác nhận không thấy
 ringing nên thực tế ổn.
 
 Nếu sau này muốn làm cho đủ:
@@ -57,7 +57,7 @@ Nếu sau này muốn làm cho đủ:
 2. Lấy `printer.cfg` thật: `http://<IP máy in>:7125/printer/objects/query?configfile`
    🟡 Máy nối qua cloud MQTT chứ không phải LAN — chưa chắc Moonraker mở cổng
 3. Không truy cập được thì so thời gian in thật vs ước tính trên bản in >1 giờ;
-   lệch >15% mà không do flow cap = đang bị kẹp
+   lệch >15% mà không do flow cap = đang bị hạ xuống
 
 ---
 
@@ -140,7 +140,7 @@ Bảng đầy đủ ở cuối `profiles/process.md`.
 nhiệt độ bàn lớp đầu, `retract_restart_extra` −0.05→0, `z_hop` 0.1→0.4,
 `support_top_z_distance` 0.16→0.2. Audit từ 3 lỗi xuống 0.
 🟢 Nâng flow cap: `Anycubic PLA - Copy` 18, ba preset BBL PLA Lite 15.
-🟢 Rollback 25 clamp tốc độ sai tầng — giới hạn flow thuộc filament preset,
+🟢 Rollback 25 lần hạ tốc độ sai tầng — giới hạn flow thuộc filament preset,
 slicer đã tự enforce lúc slice.
 🟢 `tools/acslicer_tune.py` + `docs/tool.md`.
 🟢 Tự động hoá 3.1–3.5: `CLAUDE.md`, `.gitignore`, allowlist quyền,

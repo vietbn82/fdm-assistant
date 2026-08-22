@@ -85,6 +85,73 @@ def backup(tag):
     return dst
 
 
+# ---------------------------------------------------------------- export
+REPO = Path(__file__).resolve().parent.parent
+MIRROR = REPO / "presets"
+
+
+def _mirror_pairs():
+    """(live path, repo path) for every preset worth tracking.
+
+    Drops the userid directory level so nothing identifying reaches the public
+    remote, and skips filament\\base\\ - those are cache snapshots that share a
+    "name" with the real preset and would only produce confusing double diffs.
+    """
+    out = []
+    if not USER.is_dir():
+        return out
+    for udir in sorted(USER.iterdir()):
+        if not udir.is_dir():
+            continue
+        for kind in KINDS:
+            kd = udir / kind
+            if not kd.is_dir():
+                continue
+            for p in sorted(kd.rglob("*")):
+                if p.is_dir() or "base" in p.relative_to(kd).parts:
+                    continue
+                if p.suffix not in (".json", ".info"):
+                    continue
+                out.append((p, MIRROR / kind / p.name))
+    return out
+
+
+def _normalized(src):
+    """Bytes to write into the mirror: JSON re-serialized for stable diffs."""
+    raw = src.read_bytes()
+    if src.suffix != ".json":
+        return raw
+    try:
+        data = json.loads(raw.decode("utf-8"))
+    except Exception:
+        return raw
+    return (json.dumps(data, indent=4, ensure_ascii=False, sort_keys=True)
+            + "\n").encode("utf-8")
+
+
+def export_presets(write=True):
+    """Copy live presets into presets\\. Returns the list of changed repo paths."""
+    changed = []
+    seen = set()
+    for src, dst in _mirror_pairs():
+        seen.add(dst)
+        want = _normalized(src)
+        if dst.exists() and dst.read_bytes() == want:
+            continue
+        changed.append(dst)
+        if write:
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            dst.write_bytes(want)
+    # presets deleted on disk must disappear from the mirror too
+    if MIRROR.is_dir():
+        for stale in sorted(MIRROR.rglob("*")):
+            if stale.is_file() and stale not in seen:
+                changed.append(stale)
+                if write:
+                    stale.unlink()
+    return changed
+
+
 def resolve(name, idx, _seen=None):
     """Flatten the inherits chain into one dict."""
     _seen = _seen or set()
@@ -346,9 +413,36 @@ def main():
     ap.add_argument("--yes", action="store_true")
     ap.add_argument("--flow", action="store_true",
                     help="also report speeds the filament flow cap silently throttles")
+    ap.add_argument("--export", action="store_true",
+                    help="mirror live presets into presets\\ for git tracking")
+    ap.add_argument("--check-drift", action="store_true",
+                    help="report whether presets\\ matches the live store; exit 1 if not")
     ap.add_argument("--set", action="append", default=[], metavar="PRESET|key=value",
                     help="force a value on one user preset; repeatable")
     a = ap.parse_args()
+
+    if a.check_drift:
+        changed = export_presets(write=False)
+        if changed:
+            print(f"drift: {len(changed)} file(s) differ between the live store "
+                  f"and presets\\")
+            for p in changed[:10]:
+                print("  " + p.relative_to(REPO).as_posix())
+            if len(changed) > 10:
+                print(f"  ... and {len(changed)-10} more")
+            sys.exit(1)
+        print("presets\\ matches the live store")
+        return
+
+    if a.export:
+        changed = export_presets()
+        if not changed:
+            print("presets\\ already up to date")
+        else:
+            print(f"exported, {len(changed)} file(s) changed:")
+            for p in changed:
+                print("  " + p.relative_to(REPO).as_posix())
+        return
 
     idx = build_index()
     users = {n: e for n, e in idx.items() if e["origin"].startswith("user")}

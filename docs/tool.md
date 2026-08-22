@@ -5,7 +5,7 @@ thực tế với giới hạn của máy và của nhựa, và ghi sửa nếu 
 
 Chỉ đụng vào file. Không nói chuyện với máy in, không gọi cloud.
 
-Bố cục kho preset và bốn cái bẫy khi ghi file: `docs/preset-model.md` mục 1–2.
+Bố cục kho preset và bốn cái bẫy khi ghi file: `docs/preset-model.md` mục 4–5.
 Công cụ xử lý sẵn cả bốn — trừ bẫy số 1, **bạn phải đóng slicer trước khi ghi**.
 
 ---
@@ -16,7 +16,7 @@ Công cụ xử lý sẵn cả bốn — trừ bẫy số 1, **bạn phải đó
 python tools/acslicer_tune.py --list                   # preset của bạn + preset cha
 python tools/acslicer_tune.py --show "<tên preset>"    # giá trị đã giải đầy đủ
 python tools/acslicer_tune.py --audit                  # báo cáo, không ghi
-python tools/acslicer_tune.py --audit --flow           # + tốc độ bị trần flow kẹp
+python tools/acslicer_tune.py --audit --flow           # + tốc độ bị trần flow hạ xuống
 python tools/acslicer_tune.py --audit --fix            # áp sửa, backup trước
 python tools/acslicer_tune.py --set "BBL PLA Lite|filament_max_volumetric_speed=15"
 ```
@@ -39,7 +39,7 @@ Revert = xoá `user\`, đổi tên backup lại thành `user`.
 `--fix` chỉ áp `ERR`, `WARN`, `FLOW` — và chỉ những mục có giá trị thay thế rõ ràng.
 
 🟡 `FLOW` mặc định bị ẩn vì **preset hãng cũng vi phạm** (xem `docs/preset-model.md`
-mục 4). Nó là thông tin chẩn đoán, không phải lỗi của bạn.
+mục 6). Nó là thông tin chẩn đoán, không phải lỗi của bạn.
 
 ## Kiểm tra những gì
 

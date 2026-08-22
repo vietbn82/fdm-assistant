@@ -72,10 +72,28 @@ def main():
     dirty = run(["git", "status", "--porcelain"], cwd=REPO)
     if branch:
         state = f"{len(dirty.splitlines())} uncommitted" if dirty else "clean"
+        ahead = run(["git", "rev-list", "--count", "@{u}..HEAD"], cwd=REPO)
+        if ahead and ahead != "0":
+            state += f", {ahead} unpushed"
         lines.append(f"GIT: {branch}, {state}")
         last = run(["git", "log", "-1", "--format=%h %s (%cr)"], cwd=REPO)
         if last:
             lines.append(f"LAST COMMIT: {last}")
+
+    # The preset autocommit task runs unattended every 10 minutes. If it has
+    # been refusing or failing to push, nothing else would surface that.
+    alog = os.path.join(REPO, ".git", "preset-autocommit.log")
+    if os.path.isfile(alog):
+        try:
+            tail = [l for l in open(alog, encoding="utf-8").read().splitlines() if l]
+        except Exception:
+            tail = []
+        if tail:
+            lines.append(f"PRESET AUTOCOMMIT: {tail[-1]}")
+            bad = [l for l in tail[-40:] if "REFUSED" in l or "ERROR" in l
+                   or "WARN" in l]
+            if bad:
+                lines.append(f"  !! {len(bad)} problem(s) recently, latest: {bad[-1]}")
 
     print(json.dumps({"hookSpecificOutput": {
         "hookEventName": "SessionStart",

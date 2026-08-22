@@ -17,8 +17,8 @@ Trang này chỉ chứa loại thứ nhất. Loại thứ hai ở `profiles/`:
 
 🔵 Trần động học là **khai báo phía slicer**, giới hạn thật nằm trong
 `printer.cfg` của Klipper trên máy. Preset đặt `emit_machine_limits_to_gcode = 1`
-nên slicer còn ghi `SET_VELOCITY_LIMIT` vào đầu gcode để ép máy theo. Klipper kẹp
-`VELOCITY` và `ACCEL` về mức trong config của nó, nên khai cao hơn thực tế chỉ
+nên slicer còn ghi `SET_VELOCITY_LIMIT` vào đầu gcode để ép máy theo. Klipper tự hạ
+`VELOCITY` và `ACCEL` xuống mức trong config của nó, nên khai cao hơn thực tế chỉ
 làm **ước tính thời gian sai**, không hỏng gì.
 
 Trong bốn con số, chỉ **gia tốc** và **jerk** đáng đối chiếu. Tốc độ 450 mm/s gần
@@ -26,7 +26,7 @@ như không chạm tới: trần flow đã giới hạn ở ~166 mm/s khi đùn 
 áp dụng cho travel.
 
 🟢 Jerk 20 map sang `square_corner_velocity` — cao gấp 4 lần mặc định Klipper (5),
-và đây là tham số Klipper **không** kẹp. Triệu chứng nếu quá cao là ringing quanh
+và đây là tham số Klipper **không** hạ xuống. Triệu chứng nếu quá cao là ringing quanh
 góc và lỗ. Viet xác nhận **không thấy ringing**, nên để nguyên. Xem A6 trong
 `TODO.md` nếu sau này muốn đối chiếu cho đủ.
 
@@ -57,8 +57,8 @@ góc và lỗ. Viet xác nhận **không thấy ringing**, nên để nguyên. X
 
 Gia tốc theo vai trò: travel 10000, extruding 6500, retracting 6500 mm/s².
 
-🔵 Speed hay accel trong process preset vượt các mức này bị kẹp xuống — số hiển
-thị trong slicer thành vô nghĩa.
+🔵 Speed hay accel trong process preset vượt các mức này sẽ bị tự động hạ xuống
+cho vừa — số hiển thị trong slicer thành vô nghĩa.
 
 ## Slicer
 

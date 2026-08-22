@@ -16,7 +16,7 @@ Two doc trees, split by how often they change:
 | `docs/preset-model.md` | how the store is laid out, the four file traps, which tier owns which setting |
 | `docs/device.md` | printer hardware: build volume, nozzle, kinematic ceilings |
 | `docs/tool.md` | `tools/acslicer_tune.py` reference |
-| `docs/capabilities.md` | what is automated, what stays manual |
+| `docs/capabilities.md` | the limits — what cannot be known or measured from here |
 
 **`profiles/` — live state.** Changes whenever the printer setup changes. Re-read
 rather than trusting memory of it.
@@ -50,15 +50,23 @@ rather than trusting memory of it.
 6. **Never write a preset the user has not approved by ID.** Findings and ideas
    go into `PENDING_APPLY.md` as proposals. `/apply P1 P4` is the only path from
    proposal to disk.
-7. **Never commit or push on your own.** Not after finishing a task, not to
-   "save progress", not because the tree is clean. Make the edits, say what
-   changed, and stop. `git add`, `git commit`, `git push` happen only when the
-   user asks in that turn — staging counts. Asking first is fine; assuming is not.
+7. **Never commit or push on your own** — one narrow exception below. Not after
+   finishing a task, not to "save progress", not because the tree is clean. Make
+   the edits, say what changed, and stop. `git add`, `git commit`, `git push`
+   happen only when the user asks in that turn — staging counts.
+
+   **Exception: `presets/` only.** That directory is a mirror of the live preset
+   store and may be committed and pushed unattended. Do it by running
+   `python tools/preset_autocommit.py`, never by hand — the script enforces the
+   scope, refuses if anything outside `presets/` is staged, and blocks anything
+   that looks like a credential from reaching the public remote. A hand-rolled
+   `git add presets/` has none of those guards. The exception covers no other
+   path: docs, tools and config still wait for the user to ask.
 
 ## Preset model
 
 A user preset stores only changed keys plus `"inherits": "<parent>"`. Effective
-value = the flattened chain. Two parsing traps *(full list: `docs/preset-model.md` §2)*:
+value = the flattened chain. Two parsing traps *(full list: `docs/preset-model.md` §5)*:
 
 - `filament\base\X.json` shares its `"name"` with `filament\X.json`. The
   top-level file is the live preset; `base` must never win the index.
