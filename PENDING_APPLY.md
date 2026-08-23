@@ -25,6 +25,20 @@ Trạng thái: 📝 chờ duyệt / ⏳ chờ điều kiện khác / 🔴 chặn
 python tools/acslicer_tune.py --set "PLA BBL Lite@KX 0.4|filament_max_volumetric_speed=13"
 ```
 
+### P2 📝 Giảm nhẹ lỗi first layer — process TOOL
+
+⚠️ **Đây chỉ là giảm nhẹ, không phải chữa gốc.** Thiếu nhựa theo đốm là do
+khoảng cách nozzle–bàn không đều. Level bàn / chỉnh z-offset trước; chỉ áp P2
+nếu sau khi level vẫn còn.
+
+| Key | Hiện tại | Đề xuất | Vì sao |
+|---|---|---|---|
+| `initial_layer_speed` | `50` | `30` | chậm hơn thì nhựa có thời gian ép xuống, che được sai lệch nhỏ của bàn |
+
+```bash
+python tools/acslicer_tune.py --set "Novi 0.20 - TOOL @AC KX|initial_layer_speed=30"
+```
+
 ---
 
 Thao tác đã áp dụng: `CHANGELOG.md`.

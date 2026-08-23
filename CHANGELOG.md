@@ -9,6 +9,58 @@ Diff từng dòng preset nằm ở `git log -- presets/`.
 
 ## 2026-08-23
 
+### Chống xệ overhang và giảm tơ, từ một bản in thật
+
+Bản in một màu trên slot 2 với `Novi 0.20 - TOOL @AC KX` cho ba triệu chứng.
+Backup `user_backup-tune-set-20260823-223042`. Audit sau khi ghi: 0 lỗi.
+
+**Xệ ở đỉnh lỗ tròn.** Đỉnh lỗ là vòng cung thoải dần thành dốc. Vùng 25–50%
+đầu cung chạy 50 mm/s và **chưa được tăng quạt**, vì `overhang_fan_threshold`
+đặt ở 50%. Xệ bắt đầu từ đó rồi phần dốc hơn đắp lên chỗ đã xệ. Quạt vốn đã
+100% ở overhang — vấn đề là vào quá muộn, không phải thiếu mát.
+
+| Preset | Key | Cũ | Mới |
+|---|---|---|---|
+| `Novi 0.20 - TOOL @AC KX` | `overhang_2_4_speed` | 50 | 30 |
+| `Novi 0.20 - TOOL @AC KX` | `slowdown_for_curled_perimeters` | 0 | 1 |
+| `Novi 0.28 - TEST @AC KX` | `slowdown_for_curled_perimeters` | 0 | 1 |
+| `PLA Generic@KX 0.4` | `overhang_fan_threshold` | 50% | 25% |
+| `PLA BBL Lite@KX 0.4` | `overhang_fan_threshold` | 50% | 25% |
+
+Hai preset FIGURE không cần đụng: preset gốc High Quality của hãng vốn đã đặt
+overhang 2/4 và 3/4 là 30/10 thay vì 50/30. `overhang_2_4_speed` của TEST giữ
+50 — chậm mọi overhang đi ngược mục đích của profile đó.
+
+**Tơ còn sót sau khi sửa retraction.** `retraction_minimum_travel = 2` nghĩa là
+mọi quãng di chuyển dưới 2 mm không retract chút nào; vật nhiều chi tiết nhỏ thì
+đó là rất nhiều đoạn kéo tơ. Hạ về 1 ở machine preset.
+
+**Thiếu nhựa first layer theo đốm** — không sửa bằng preset. Thiếu theo đốm là
+khoảng cách nozzle–bàn không đều, thiếu đều khắp mới là flow. Cần level bàn.
+Đề xuất hạ `initial_layer_speed` 50 → 30 để lại trong `PENDING_APPLY.md` như
+biện pháp giảm nhẹ, chỉ dùng nếu level xong vẫn còn.
+
+### Sửa hồi quy retraction, thêm `Novi 0.16 - FIGURE @AC KX`
+
+**Hồi quy do lần gộp filament trước đó.** `filament_retraction_length = "nil"`
+không phải rác — nó nghĩa là "đừng đè lên machine preset". Lúc gộp hai preset
+BBL thành một, key đó bị xoá vì tưởng là nhiễu, nên filament rơi về giá trị
+`0.8` của vendor và **đè lên** `retraction_length = 1` đã tinh chỉnh ở machine.
+Retraction thực tế tụt 1 → 0.8 mm, và phần tinh chỉnh machine thành vô hiệu.
+Cùng lỗi ở `PLA Generic@KX 0.4`, mất thêm `filament_wipe_distance`.
+
+Khôi phục cả ba key. Backup `user_backup-tune-set-20260823-171013`.
+
+Sửa cả gốc rễ trong `tools/acslicer_tune.py`: rule cũ báo `nil` là "harmless but
+noisy" — chính nó dẫn tới quyết định xoá. Thay bằng rule ngược lại, cảnh báo khi
+một key `filament_*` **đang đè** lên machine preset, kèm đề xuất đặt `nil`.
+
+**Preset mới `Novi 0.16 - FIGURE @AC KX`** — kế thừa `0.16mm High Quality
+@Kobra X`, cho model lớn mà 0.12 mất quá nhiều thời gian. Bớt được một override
+so với bản 0.12 vì cha đã dùng `gyroid` sẵn, nhưng phải đè `ironing_speed`
+30 → 20 và `ironing_spacing` 0.15 → 0.1. Backup
+`user_backup-tune-new-016-figure-20260823-222044`. Audit: 0 lỗi, 7 preset.
+
 ### Bật thu hồi nhựa purge cho TOOL và TEST
 
 Backup `user_backup-tune-set-20260823-033101`. Audit sau khi ghi: 0 lỗi.

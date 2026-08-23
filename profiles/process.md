@@ -10,7 +10,8 @@ Quy tắc đặt tên: `Novi {layer height} - {FIGURE|TOOL|TEST} @AC KX`
 
 | Preset | Kế thừa | Mục đích |
 |---|---|---|
-| `Novi 0.12 - FIGURE @AC KX` | `0.12mm High Quality @Kobra X` | sắc nét, bề mặt liền |
+| `Novi 0.12 - FIGURE @AC KX` | `0.12mm High Quality @Kobra X` | sắc nét nhất, model nhỏ |
+| `Novi 0.16 - FIGURE @AC KX` | `0.16mm High Quality @Kobra X` | model lớn hơn, vẫn cần sắc nét nhưng 0.12 quá lâu |
 | `Novi 0.20 - TOOL @AC KX` | `0.20mm Standard @Kobra X` | chắc, đủ nhanh |
 | `Novi 0.28 - TEST @AC KX` | `0.28mm Standard @Kobra X` | nhanh nhất, bỏ mọi thứ thừa |
 
@@ -22,9 +23,14 @@ filament preset, slicer tự làm lúc slice — xem `docs/preset-model.md` mụ
 
 ---
 
-## FIGURE 0.12 — ưu tiên sắc nét
+## FIGURE — ưu tiên sắc nét
+
+Hai bản, cùng ý đồ, khác layer height. Chọn 0.12 cho model nhỏ nhiều chi tiết,
+0.16 khi model lớn và 0.12 mất quá nhiều thời gian.
 
 Đánh đổi: chậm, lấy cạnh sắc và mặt trên liền.
+
+### FIGURE 0.12 — cha `0.12mm High Quality @Kobra X`
 
 | Key | Cha | Đặt | Vì sao |
 |---|---|---|---|
@@ -36,12 +42,35 @@ filament preset, slicer tự làm lúc slice — xem `docs/preset-model.md` mụ
 | `detect_thin_wall` | 0 | **1** | giữ chi tiết mảnh |
 | `slowdown_for_curled_perimeters` | 0 | **1** | |
 
-Kế thừa sẵn, không cần đè: `wall_sequence = inner wall/outer wall` (outer in sau
-cùng — bề mặt đẹp nhất), `outer_wall_acceleration = 2000`, `seam_position =
-aligned`, `ironing_speed = 15`, `ironing_spacing = 0.1`, top/bottom shell 5/5.
+Kế thừa sẵn: `wall_sequence = inner wall/outer wall` (outer in sau cùng — bề mặt
+đẹp nhất), `outer_wall_acceleration = 2000`, `seam_position = aligned`,
+`ironing_speed = 15`, `ironing_spacing = 0.1`, top/bottom shell 5/5.
 
 🟢 Ở layer 0.12, trần flow không phải giới hạn (~297 mm/s). Chất lượng mới là
-thứ quyết định tốc độ, nên các giá trị của hãng dùng được nguyên.
+thứ quyết định tốc độ, nên giá trị của hãng dùng được nguyên.
+
+### FIGURE 0.16 — cha `0.16mm High Quality @Kobra X`
+
+| Key | Cha | Đặt | Vì sao |
+|---|---|---|---|
+| `outer_wall_speed` | 60 | **50** | như trên |
+| `sparse_infill_density` | 15% | **12%** | |
+| `ironing_type` | no ironing | **top** | |
+| `ironing_speed` | 30 | **20** | 30 là bào chứ không phải miết |
+| `ironing_spacing` | 0.15 | **0.1** | |
+| `seam_slope_type` | none | **all** | |
+| `detect_thin_wall` | 0 | **1** | |
+| `slowdown_for_curled_perimeters` | 0 | **1** | |
+
+Kế thừa sẵn: `wall_sequence`, `outer_wall_acceleration = 2000`, `seam_position =
+aligned`, `wall_loops = 2`, top/bottom shell **6/4**.
+
+🟢 Bớt được một override so với bản 0.12: cha của 0.16 đã dùng `gyroid` sẵn.
+Ngược lại phải đè `ironing_speed` và `ironing_spacing` vì cha đặt 30 / 0.15,
+trong khi cha của 0.12 đã đặt sẵn 15 / 0.1.
+
+🔵 Flow vẫn chưa chạm trần: nhanh nhất 200 mm/s → 14,4 mm³/s ở layer 0.16, dưới
+15. Với slot 2 (Generic, trần 13) thì phần internal solid bị hạ nhẹ.
 
 ## TOOL 0.20 — ưu tiên chắc + nhanh
 
@@ -90,6 +119,7 @@ Với `filament_max_volumetric_speed` = 15 mm³/s:
 | layer | line width | tốc độ tối đa thực tế |
 |---|---|---|
 | 0.12 | 0.42 | ~297 mm/s — flow không phải giới hạn |
+| 0.16 | 0.45 | ~208 mm/s — vẫn chưa chạm |
 | 0.20 | 0.45 | ~166 mm/s |
 | 0.28 | 0.45 | ~119 mm/s |
 
