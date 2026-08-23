@@ -21,6 +21,9 @@
     "nozzle_temperature_range_high": [
         "220"
     ],
+    "overhang_fan_threshold": [
+        "25%"
+    ],
     "textured_plate_temp": [
         "45"
     ],

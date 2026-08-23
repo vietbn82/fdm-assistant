@@ -8,6 +8,7 @@
     "is_custom_defined": "0",
     "name": "Novi 0.28 - TEST @AC KX",
     "print_settings_id": "Novi 0.28 - TEST @AC KX",
+    "slowdown_for_curled_perimeters": "1",
     "sparse_infill_density": "5%",
     "sparse_infill_pattern": "lightning",
     "top_shell_layers": "2",
