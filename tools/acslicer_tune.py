@@ -352,11 +352,23 @@ def audit_filament(name, cfg, own, machine, findings):
         if k in own:
             add("INFO", f"'{k}' is a pellet-extruder key, meaningless on an FDM "
                         f"profile - stray value from a preset copy")
-    nils = [k for k, v in own.items()
-            if isinstance(v, list) and v and str(v[0]).strip() == "nil"]
-    if nils:
-        add("INFO", f"{len(nils)} keys written as nil (fall through to parent): "
-                    f"{', '.join(sorted(nils)[:4])}...")
+    # A filament_* key set to "nil" is NOT noise: it means "do not override the
+    # machine preset". Deleting it lets the vendor parent's real value win, which
+    # silently replaces whatever the machine preset was tuned to. Flag the
+    # opposite case instead - an override the user may not know is in effect.
+    for k, mk in (("filament_retraction_length", "retraction_length"),
+                  ("filament_retraction_speed", "retraction_speed"),
+                  ("filament_z_hop", "z_hop"),
+                  ("filament_wipe_distance", "wipe_distance")):
+        v = num(cfg.get(k))
+        if v is None:
+            continue                       # "nil" -> machine value applies, fine
+        mv = num(machine.get(mk))
+        if mv is not None and abs(v - mv) > 1e-9:
+            add("WARN", f"{k}={v:g} overrides the machine preset's {mk}={mv:g}. "
+                        f"The filament wins, so the machine value never applies. "
+                        f"Set it to \"nil\" to defer to the machine.",
+                k, "nil")
 
     # PLA prints fine on a 60C bed even though Tg is ~54C; only a big overshoot
     # actually causes elephant foot, so this is a note, not an error.
