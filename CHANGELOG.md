@@ -7,6 +7,48 @@ Diff từng dòng preset nằm ở `git log -- presets/`.
 
 ---
 
+## 2026-08-24
+
+### Sửa pressure advance hỏng và tách lớp
+
+Từ một bản in `Novi 0.16 - FIGURE @AC KX` trên slot 1 (BBL PLA Lite).
+Backup `user_backup-tune-set-20260824-083913`. Audit: 0 lỗi.
+
+**Nhựa dư ở đường seam.** `adaptive_pressure_advance = 1` nhưng
+`adaptive_pressure_advance_model` toàn số `0` — chưa hiệu chuẩn bao giờ. PA tính
+ra gần bằng 0, nozzle đùn tiếp khi lẽ ra phải dừng, nhựa dư đọng đúng chỗ kết
+thúc vòng. Slot 2 không bị vì nó tắt adaptive và dùng PA tĩnh 0.036.
+
+Cờ `adaptive_pressure_advance` này được mang sang khi gộp hai preset BBL mà
+không kiểm model có dữ liệu không.
+
+| Preset | Key | Cũ | Mới |
+|---|---|---|---|
+| `PLA BBL Lite@KX 0.4` | `adaptive_pressure_advance` | 1 | 0 |
+| `PLA BBL Lite@KX 0.4` | `pressure_advance` | 0.025 | 0.036 |
+| `Novi 0.12 / 0.16 - FIGURE` | `seam_slope_type` | all | external |
+
+`seam_slope_type = all` áp scarf joint cho cả tường trong — không ai nhìn thấy,
+mà mỗi chỗ vát là một lần chuyển lượng nhựa đẩy thêm vật liệu ra ngoài.
+
+**Lớp giòn, tách được bằng tay.** Nhiệt 202 °C ở đáy dải PLA, quạt tối thiểu
+80%, và FIGURE in chậm ở layer mỏng nên mỗi đường nhựa nguội hẳn trước khi lớp
+sau đắp lên.
+
+| Key | Cũ | Mới |
+|---|---|---|
+| `nozzle_temperature_HS` | 202 | 212 |
+| `nozzle_temperature` | 205 *(kế thừa)* | 212 |
+| `fan_min_speed` | 80 | 60 |
+
+Đặt cả hai khoá nhiệt để không phụ thuộc slicer đọc khoá nào. `overhang_fan_speed`
+giữ 100 nên overhang vẫn được làm mát tối đa dù quạt nền hạ xuống.
+
+🟡 Hai nhóm này đối nghịch nhau — nâng nhiệt làm tăng tơ. Áp cùng lúc là có chủ
+ý: sửa PA giảm tơ, bù lại phần nhiệt tăng thêm.
+
+---
+
 ## 2026-08-23
 
 ### Chống xệ overhang và giảm tơ, từ một bản in thật
