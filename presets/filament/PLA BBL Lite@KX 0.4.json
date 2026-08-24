@@ -1,12 +1,9 @@
 {
-    "adaptive_pressure_advance": [
-        "0"
-    ],
     "close_fan_the_first_x_layers": [
         "2"
     ],
-    "fan_min_speed": [
-        "60"
+    "fan_min_speed_HS": [
+        "80"
     ],
     "filament_density": [
         "1.3"
@@ -26,6 +23,9 @@
     "filament_vendor": [
         "BambuLab"
     ],
+    "filament_wipe_distance": [
+        "nil"
+    ],
     "from": "User",
     "hot_plate_temp": [
         "50"
@@ -36,9 +36,6 @@
     "inherits": "Anycubic PLA @Anycubic Kobra X 0.4 nozzle",
     "is_custom_defined": "0",
     "name": "PLA BBL Lite@KX 0.4",
-    "nozzle_temperature": [
-        "212"
-    ],
     "nozzle_temperature_HS": [
         "212"
     ],
@@ -50,9 +47,6 @@
     ],
     "overhang_fan_threshold": [
         "25%"
-    ],
-    "pressure_advance": [
-        "0.036"
     ],
     "slow_down_layer_time_HS": [
         "5"
