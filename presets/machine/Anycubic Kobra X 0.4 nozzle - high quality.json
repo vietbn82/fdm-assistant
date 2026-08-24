@@ -7,11 +7,14 @@
     "is_custom_defined": "0",
     "name": "Anycubic Kobra X 0.4 nozzle - high quality",
     "printer_settings_id": "Anycubic Kobra X 0.4 nozzle - high quality",
+    "retract_before_wipe": [
+        "70%"
+    ],
     "retract_restart_extra": [
         "0"
     ],
     "retraction_length": [
-        "1"
+        "1.2"
     ],
     "retraction_minimum_travel": [
         "1"
