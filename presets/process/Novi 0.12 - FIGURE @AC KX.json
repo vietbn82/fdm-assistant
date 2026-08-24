@@ -7,7 +7,7 @@
     "name": "Novi 0.12 - FIGURE @AC KX",
     "outer_wall_speed": "50",
     "print_settings_id": "Novi 0.12 - FIGURE @AC KX",
-    "seam_slope_type": "all",
+    "seam_slope_type": "external",
     "slowdown_for_curled_perimeters": "1",
     "sparse_infill_density": "12%",
     "sparse_infill_pattern": "gyroid",
