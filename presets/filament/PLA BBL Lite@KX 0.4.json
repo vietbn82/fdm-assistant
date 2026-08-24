@@ -34,7 +34,7 @@
     "is_custom_defined": "0",
     "name": "PLA BBL Lite@KX 0.4",
     "nozzle_temperature_HS": [
-        "205"
+        "202"
     ],
     "nozzle_temperature_initial_layer_HS": [
         "210"
