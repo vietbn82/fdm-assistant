@@ -370,13 +370,16 @@ def audit_filament(name, cfg, own, machine, findings):
                         f"Set it to \"nil\" to defer to the machine.",
                 k, "nil")
 
-    # PLA prints fine on a 60C bed even though Tg is ~54C; only a big overshoot
-    # actually causes elephant foot, so this is a note, not an error.
+    # PLA runs on a 60C bed as standard practice even though Tg is ~54C, and
+    # elefant_foot_compensation exists to absorb the squish. Warning at +5 fired
+    # on the vendor's own default and taught nothing; only a real overshoot is
+    # worth reporting.
     tv = num(cfg.get("temperature_vitrification"))
     bed = num(cfg.get("hot_plate_temp")) or num(cfg.get("textured_plate_temp"))
-    if tv and bed and bed > tv + 5:
+    if tv and bed and bed > tv + 15:
         add("WARN", f"bed {bed:g}C is {bed-tv:g}C above softening point "
-                    f"temperature_vitrification {tv:g}C - elephant foot risk")
+                    f"temperature_vitrification {tv:g}C - elephant foot, and the "
+                    f"part may soften enough to shift")
 
     hp = num(cfg.get("hot_plate_temp"))
     hp1 = num(cfg.get("hot_plate_temp_initial_layer"))

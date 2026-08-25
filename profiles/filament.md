@@ -19,10 +19,9 @@ Tầng nào sở hữu gì: `docs/preset-model.md` mục 3.
 Hex lấy từ `filament_colors` trong `.conf` — tức màu bạn đã chọn trong UI, không
 phải bảng của hãng. Đó mới là giá trị slicer thật sự dùng để tính flush.
 
-🟡 **Slot 2 đang dùng preset stock, không phải `PLA Generic@KX 0.4` bạn tạo.**
-Nghĩa là trần flow đang là 13 (trùng ý định) nhưng `nozzle_temperature_HS = 210`
-và `nozzle_temperature_range_high = 220` bạn đặt thì **không có tác dụng**. Đổi
-trong UI: tab Filament, slot 2, chọn `PLA Generic@KX 0.4`.
+🟡 **Kiểm tra slot 2 đang gán preset nào.** Lần soát trước nó dùng preset stock
+chứ không phải `PLA Generic@KX 0.4`. Gán slot nằm trong state của project, không
+đọc được từ `.conf` — phải nhìn trong UI: tab Filament, slot 2.
 
 **Mỗi slot theo dõi riêng.** Thay cuộn ở slot 2 thì chỉ sửa dòng 2 — ba slot kia
 giữ nguyên ngày của chúng.
@@ -77,38 +76,45 @@ nozzle`) — mỗi cái giữ một nửa thông tin, không cái nào đủ.
 
 | Key | Giá trị |
 |---|---|
-| `filament_max_volumetric_speed` | 15 ⏳ chưa test |
+| `filament_max_volumetric_speed` | 13 *(hãng)* ⏳ chưa đo |
 | `filament_flow_ratio` | 0.98 |
 | `filament_density` / `filament_vendor` | 1.3 / BambuLab |
-| `nozzle_temperature_HS` / `_initial_layer_HS` | 205 / 210 |
+| `nozzle_temperature_HS` / `_initial_layer_HS` | 212 / 212 |
 | `nozzle_temperature_range_high` | 215 |
-| `pressure_advance` / `adaptive_pressure_advance` | 0.025 / bật |
-| `hot_plate_temp` / `_initial_layer` | 50 / 50 |
-| `textured_plate_temp` / `_initial_layer` | 50 / 50 |
+| `pressure_advance` / `adaptive_pressure_advance` | 0.036 / tắt |
+| **`textured_plate_temp` / `_initial_layer`** | **60 / 60** ← bàn đang dùng |
+| `hot_plate_temp` / `_initial_layer` | 50 / 60 *(không dùng)* |
+| `fan_min_speed_HS` / `fan_max_speed_HS` | 60 / 90 |
+| `overhang_fan_threshold` | 25% |
 | `close_fan_the_first_x_layers` | 2 |
+| `filament_retraction_length` / `_wipe_distance` | `nil` → theo machine |
 | `slow_down_layer_time_HS` / `slow_down_min_speed` | 5 / 10 |
 
-🔵 Nhiệt bàn: hai preset cũ mâu thuẫn nhau — một cái ghi 50 thường / 45 lớp đầu,
-cái kia ngược lại. Chốt phẳng 50 cho cả hai, để lớp đầu không bao giờ là lớp
-nguội nhất, mà cũng không bịa ra con số mới.
+🔴 **Chỉ `textured_plate_temp*` có tác dụng.** `curr_bed_type = 4` cho máy đang
+chọn, tức bàn Textured PEI. Cặp `hot_plate_temp*` chỉ áp dụng cho mặt bàn nhẵn —
+sửa nhầm cặp đó thì không có gì xảy ra cả.
+
+🔵 Cả hai khoá textured đã bị revert về 45/50 ngày 24/08, gây bong bàn. Khôi phục
+60/60 ngày 25/08 — trùng đúng giá trị hãng.
 
 ### `PLA Generic@KX 0.4` — slot 2
 
 | Key | Giá trị |
 |---|---|
 | `filament_max_volumetric_speed` | 13 — mặc định hãng |
-| `nozzle_temperature_HS` | 210 |
+| `nozzle_temperature_HS` | 205 |
 | `nozzle_temperature_range_high` | 220 |
-| `textured_plate_temp` / `_initial_layer` | 45 / 50 |
+| **`textured_plate_temp` / `_initial_layer`** | **60 / 60** ← bàn đang dùng |
+| `overhang_fan_threshold` | 25% |
+| `filament_retraction_length` / `_wipe_distance` | `nil` → theo machine |
 
 🔵 Trần flow để 13 chứ không phải 15. Con số 15 trước đó chép sang từ BBL, chưa
 đo. Nhựa Generic không rõ nguồn thì không đoán cao.
 
-🟡 `hot_plate_temp` kế thừa 60 từ hãng, cao hơn điểm mềm PLA (~54 °C) 6 độ — có
-thể gây elephant foot. Chỉ ảnh hưởng khi dùng mặt bàn nhẵn; bàn textured đang
-đặt 45/50 nên không sao.
+🔵 Nhiệt bàn cũng bị revert về 45/55, khôi phục 60/60 ngày 25/08 cùng lúc với
+BBL. Cùng một lỗi, cùng một cách sửa.
 
 Cả hai kế thừa `Anycubic PLA @Anycubic Kobra X 0.4 nozzle`.
 
-⏳ A1 trong `TODO.md`: flow test xác nhận 15 mm³/s cho BBL PLA Lite. 15 là trần
-Bambu công bố, chưa đo trên hotend này.
+⏳ A1 trong `TODO.md`: in thử để xác nhận trần flow **13** có đủ không. 13 là
+mặc định hãng; 15 là trần Bambu công bố, cả hai đều chưa đo trên hotend này.

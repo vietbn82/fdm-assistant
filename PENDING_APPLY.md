@@ -16,28 +16,21 @@ Trạng thái: 📝 chờ duyệt / ⏳ chờ điều kiện khác / 🔴 chặn
 
 ## Đang chờ
 
-| ID | Preset | Key | Hiện tại | Đề xuất | Điều kiện |
-|---|---|---|---|---|---|
-| P1 ⏳ | `PLA BBL Lite@KX 0.4` | `filament_max_volumetric_speed` | `15` | `13` | **chỉ khi flow test A1 thất bại** |
+### P6 📝 Bắt được travel ngắn ở đỉnh — machine preset
 
-```bash
-# P1
-python tools/acslicer_tune.py --set "PLA BBL Lite@KX 0.4|filament_max_volumetric_speed=13"
+| Key | Hiện tại | Đặt |
+|---|---|---|
+| `retraction_minimum_travel` | 1 | **0.5** |
+
+```
+python tools/acslicer_tune.py --set "Anycubic Kobra X 0.4 nozzle - high quality|retraction_minimum_travel=0.5"
 ```
 
-### P2 📝 Giảm nhẹ lỗi first layer — process TOOL
+Ở đỉnh model tiết diện nhỏ, các bước nhảy ngắn hơn 1 mm hiện **không** rút nhựa
+— đó là chỗ sinh tơ. Hạ ngưỡng để chúng cũng được rút.
 
-⚠️ **Đây chỉ là giảm nhẹ, không phải chữa gốc.** Thiếu nhựa theo đốm là do
-khoảng cách nozzle–bàn không đều. Level bàn / chỉnh z-offset trước; chỉ áp P2
-nếu sau khi level vẫn còn.
-
-| Key | Hiện tại | Đề xuất | Vì sao |
-|---|---|---|---|
-| `initial_layer_speed` | `50` | `30` | chậm hơn thì nhựa có thời gian ép xuống, che được sai lệch nhỏ của bàn |
-
-```bash
-python tools/acslicer_tune.py --set "Novi 0.20 - TOOL @AC KX|initial_layer_speed=30"
-```
+🟡 Đánh đổi: số lần rút tăng, mài nhựa nhiều hơn ở một điểm. Cố ý để riêng: in
+thử với P1–P5 trước đã, vì nozzle vừa làm sạch nên phần tơ có thể đã tự hết.
 
 ---
 

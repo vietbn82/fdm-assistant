@@ -23,6 +23,21 @@ filament preset, slicer tự làm lúc slice — xem `docs/preset-model.md` mụ
 
 ---
 
+## Áp cho cả bốn profile
+
+| Key | Cha | Đặt | Vì sao |
+|---|---|---|---|
+| `small_perimeter_threshold` | 0 | **20** | ngưỡng 0 mm khiến `small_perimeter_speed = 50%` **không bao giờ chạy** — không đoạn nào đủ điều kiện "chu vi nhỏ". 20 mm chu vi ≈ đường kính 6,4 mm |
+| `wipe_before_external_loop` | 0 | **1** | lau trước khi vào tường ngoài, giấu điểm bắt đầu |
+| `seam_gap` | 10% | **15%** | chừa hở nhiều hơn ở điểm khép vòng, bớt cục nhựa |
+| `skirt_loops` | 0 | **2** | mồi nhựa trước khi vào vật — vị trí in đầu tiên hay thiếu nhựa |
+| `wipe_on_loops` | 0 | **1** | |
+
+🔵 `small_perimeter_threshold` đo theo **chu vi**, không phải bán kính. Lỗ và trụ
+nhỏ hơn ngưỡng in ở 50% tốc độ tường ngoài — đầu đùn kịp bơm trong đoạn ngắn.
+
+---
+
 ## FIGURE — ưu tiên sắc nét
 
 Hai bản, cùng ý đồ, khác layer height. Chọn 0.12 cho model nhỏ nhiều chi tiết,
@@ -114,7 +129,8 @@ override**, đừng đổi cả profile.
 
 ## Trần flow quyết định tốc độ, không phải layer height
 
-Với `filament_max_volumetric_speed` = 15 mm³/s:
+Với `filament_max_volumetric_speed` = 15 mm³/s *(hiện đang để 13 — bảng dưới
+giữ 15 để so sánh, tốc độ thực tế thấp hơn ~13%)*:
 
 | layer | line width | tốc độ tối đa thực tế |
 |---|---|---|

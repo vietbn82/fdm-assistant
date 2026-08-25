@@ -7,7 +7,142 @@ Diff từng dòng preset nằm ở `git log -- presets/`.
 
 ---
 
+## 2026-08-25
+
+### Preset bị revert — khôi phục, và tìm ra bàn nhiệt sai loại
+
+Bản in đẹp hơn nhiều nhưng bong khỏi bàn ở vài vị trí, kèm nhựa cháy đen bám
+ngược lên nozzle. Backup `user_backup-tune-set-20260825-105003` và
+`...-105013`.
+
+**Không phải chỉnh sai — preset đã bị ghi đè.** Commit `058b051` (24/08, sau
+`9a80457`) xoá loạt sửa của ngày 23 và ghi lại giá trị cũ. Nghi cloud sync kéo
+bản trên mây đè bản local. Chi tiết theo dõi ở A4 trong `TODO.md`.
+
+**Máy chạy bàn Textured PEI**, không phải bàn nhẵn. `curr_bed_type = 4` cho
+`Anycubic Kobra X 0.4 nozzle - high quality`, nên cặp key có tác dụng là
+`textured_plate_temp*`. Sau revert, bàn chạy 50 lớp đầu rồi tụt về **45** duy
+trì — quá lạnh cho PLA. Vật bám lớp đầu rồi bong giữa chừng, nozzle đập vào,
+nhựa quấn lên đầu in và cháy thành carbon.
+
+🔵 Nhựa cháy là **hậu quả**, không phải nguyên nhân. Carbon bong ra từng mảnh
+rơi vào dòng nhựa — nhiều khả năng chính là các điểm thiếu nhựa rải rác trước
+đó. Ba triệu chứng cùng một chuỗi nhân quả.
+
+| Preset | Key | Cũ | Mới |
+|---|---|---|---|
+| `PLA BBL Lite@KX 0.4` | `textured_plate_temp_initial_layer` | 50 | **60** |
+| `PLA BBL Lite@KX 0.4` | `textured_plate_temp` | 45 | **60** |
+| `PLA BBL Lite@KX 0.4` | `nozzle_temperature_HS` | 210 | **212** |
+| `PLA BBL Lite@KX 0.4` | `fan_min_speed_HS` | *(vắng)* | **60** |
+| `PLA Generic@KX 0.4` | `textured_plate_temp_initial_layer` | 55 | **60** |
+| `PLA Generic@KX 0.4` | `textured_plate_temp` | 45 | **60** |
+
+🔵 Giá trị hãng của cả hai khoá `textured_plate_temp*` vốn đã là 60/60. Con số
+45/50 nằm trong user preset là override **lạnh hơn hãng** — dấu vết rõ ràng của
+lần revert, không phải mặc định.
+
+🟡 `fan_min_speed_HS` thực ra đã là 60 nhờ kế thừa từ hãng — bucket ghi "hiện
+tại 80" là sai, 80 là `fan_min_speed` (khoá máy này bỏ qua). Vẫn ghi 60 tường
+minh để lần ghi đè sau nhìn thấy được trong `git diff`.
+
+### `small_perimeter_speed` chưa từng chạy
+
+`small_perimeter_threshold = 0` nghĩa là không đoạn nào đủ điều kiện "chu vi
+nhỏ", nên `small_perimeter_speed = 50%` là cài đặt chết. Lỗ và trụ nhỏ vẫn in ở
+tốc độ tường ngoài đầy đủ, đầu đùn không kịp bơm trong đoạn ngắn — ra thiếu
+nhựa.
+
+Đặt ngưỡng **20 mm** chu vi (≈ đường kính 6,4 mm) cho cả bốn process.
+
+### Giảm seam
+
+Cả bốn process: `wipe_before_external_loop` 0 → **1**, `seam_gap` 10% → **15%**.
+
+### Phần cứng — Viet đã làm
+
+Nozzle đã được làm sạch, bàn PEI đã rửa. Hai việc này preset không thay được và
+là điều kiện để đánh giá bản in tới.
+
+---
+
 ## 2026-08-24
+
+### Sửa hồi quy nhiệt bàn — bản in bong thành "mỳ tôm"
+
+Bản in bong khỏi bàn ngay từ mấy lớp đầu. Hai lỗi, cả hai do tôi.
+Backup `user_backup-tune-set-20260824-121615`.
+
+**Nhiệt bàn 50 thay vì 60.** Lúc gộp hai preset BBL, chúng ghi nhiệt bàn mâu
+thuẫn nhau (50/45 và 45/50). Tôi chốt phẳng 50 — lấy con số từ preset cũ chưa rõ
+nguồn gốc thay vì quay về giá trị hãng là 60. Thiếu 10 °C thì PLA bám yếu. Lớp
+đầu đã có dấu hiệu bong ở lần in trước, lần này bong hẳn.
+
+🔵 Bài học: khi hai giá trị mâu thuẫn nhau và không biết cái nào đúng, mốc để
+quay về là **giá trị của hãng**, không phải trung bình hay một trong hai.
+
+**Lệnh giảm quạt chưa từng có tác dụng.** Máy này chỉ đọc biến thể `_HS`. Slicer
+đã lặng lẽ xoá `fan_min_speed = 60` và giữ `fan_min_speed_HS = 80`. Cùng lý do
+`nozzle_temperature = 212` bị xoá còn `nozzle_temperature_HS = 212` sống sót —
+phần nhiệt may mà đúng vì đã đặt cả hai khoá.
+
+| Key | Cũ | Mới |
+|---|---|---|
+| `hot_plate_temp` / `_initial_layer` | 50 / 50 | 60 / 60 |
+| `textured_plate_temp` / `_initial_layer` | 50 / 50 | 60 / 60 |
+| `fan_min_speed_HS` | 80 | 60 |
+
+🟢 Pressure advance không bị ảnh hưởng. Slicer xoá `pressure_advance` và
+`adaptive_pressure_advance` khỏi preset vì chúng đã trùng giá trị cha — đúng
+hành vi, giá trị hiệu lực vẫn là 0.036 và tắt.
+
+**Nới ngưỡng cảnh báo nhiệt bàn** trong `tools/acslicer_tune.py` từ `+5` lên
+`+15` so với `temperature_vitrification`. Ở mức cũ nó kêu ngay với bàn 60 °C cho
+PLA — vốn là chuẩn ngành, là mặc định của hãng, và đã có
+`elefant_foot_compensation` bù. Cảnh báo đúng mà vô dụng thì chỉ làm nhiễu.
+
+### Tăng infill FIGURE 12% → 18%
+
+Backup `user_backup-tune-set-20260824-114109`. Audit: 0 lỗi.
+
+`sparse_infill_density` 12% → 18% cho cả `Novi 0.12` và `Novi 0.16 - FIGURE`,
+giữ nguyên `gyroid`. Cùng với wall 3, đây là đòn bẩy vật liệu cuối cùng cho độ
+bền của profile FIGURE.
+
+🟡 Áp dù chưa xác định được kiểu gãy. Nếu vật **tách theo lớp ngang** chứ không
+gãy ngang thân thì thay đổi này không giúp gì — liên kết giữa các lớp là bài
+toán nhiệt hoặc ẩm, không phải lượng vật liệu. Bản in trước đã chạy 3 wall mà
+vẫn gãy, nên khả năng đó là đáng kể.
+
+### Mồi nozzle bằng skirt, tơ đợt 2, đồng bộ wall
+
+Backup `user_backup-tune-set-20260824-113519`. Audit: 0 lỗi.
+
+**Vị trí in đầu tiên của lớp đầu bị bong và thiếu nhựa.** `skirt_loops = 0` ở
+cả bốn profile — không có gì mồi nozzle trước khi vào vật in. Nozzle rỉ nhựa
+lúc gia nhiệt nên mất áp, và những đường đùn đầu tiên bị đói, rơi đúng vào chỗ
+vật bắt đầu. Đặt `skirt_loops = 2` cho cả bốn.
+
+🔵 Chẩn đoán trước đó sai. Khi triệu chứng được mô tả là "một vài vị trí" thì
+suy ra bàn cong; khi biết rõ là "**vị trí đầu tiên**" thì đó là chuyện mồi
+nozzle. Hai lỗi khác nhau, cần hỏi cho rõ trước khi kết luận.
+
+**Tơ vẫn còn sau khi sửa PA và nâng nhiệt.** Ba đòn bẩy cùng trục kiểm soát rỉ
+nhựa:
+
+| Preset | Key | Cũ | Mới |
+|---|---|---|---|
+| `Kobra X 0.4 - high quality` | `retraction_length` | 1 | 1.2 |
+| `Kobra X 0.4 - high quality` | `retract_before_wipe` | 0% | 70% |
+| cả 4 process | `wipe_on_loops` | 0 | 1 |
+
+**Wall.** `Novi 0.16 - FIGURE` hoá ra đã được đổi sang 3 wall trong UI từ trước
+— bản in bị gãy đã chạy ở 3 wall, nên wall không phải nút thắt. Đồng bộ
+`Novi 0.12 - FIGURE` lên 3 cho cùng mục đích thì cùng độ dày vỏ.
+
+⏳ Còn treo: nếu vật **tách theo lớp ngang** chứ không gãy ngang thân thì thêm
+wall hay infill đều không cứu được — đó là bài toán nhiệt hoặc ẩm. Cuộn slot 1
+mở 2026-08-13, không máy sấy.
 
 ### Sửa pressure advance hỏng và tách lớp
 
