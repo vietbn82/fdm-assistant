@@ -9,12 +9,15 @@
     "outer_wall_speed": "120",
     "overhang_2_4_speed": "30",
     "print_settings_id": "Novi 0.20 - TOOL @AC KX",
+    "seam_gap": "15%",
     "skirt_loops": "2",
     "slowdown_for_curled_perimeters": "1",
+    "small_perimeter_threshold": "20",
     "sparse_infill_density": "25%",
     "sparse_infill_pattern": "gyroid",
     "version": "1.3.2606.12",
     "wall_loops": "4",
     "wall_sequence": "inner-outer-inner wall",
+    "wipe_before_external_loop": "1",
     "wipe_on_loops": "1"
 }
