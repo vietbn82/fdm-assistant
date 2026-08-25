@@ -9,6 +9,91 @@ Diff từng dòng preset nằm ở `git log -- presets/`.
 
 ## 2026-08-25
 
+### Chép bộ sửa bám bàn sang `Novi 0.12 - FIGURE @AC KX`
+
+Backup `user_backup-tune-set-20260825-220223`.
+
+| Key | Cũ | Mới |
+|---|---|---|
+| `brim_type` | auto_brim | **brim_ears** |
+| `initial_layer_speed` | 50 | **30** |
+| `initial_layer_infill_speed` | 100 | **50** |
+| `wall_loops` | 3 | **4** |
+
+🟡 `initial_layer_print_height` **không chép** — giữ 0.2. Bản 0.16 đặt lớp đầu
+bằng chính layer height; áp logic đó cho 0.12 thì lớp đầu chỉ còn 0.12 mm, mất
+dung sai bám bàn đúng lúc đang sửa bám bàn. Đang chờ Viet chốt.
+
+🔵 `sparse_infill_density` cũng không chép — 0.12 giữ 18%, không phải giá trị
+first-layer nên ngoài phạm vi lần này.
+
+### Clone filament trong project tự hết — A3 đóng, không cần sửa file
+
+Lần save 21:46 ghi lại project. `project_settings.config` giờ đúng cho cả bốn
+slot: nhiệt bàn 60/60 ×4, `nozzle_temperature_HS` 212·212·205·212,
+`fan_min_speed_HS` 60 ×4, `filament_max_volumetric_speed` 13 ×4,
+`curr_bed_type = Textured PEI Plate`. `filament_settings_id` trỏ về bốn preset
+thật, hết đuôi `(...3mf)`.
+
+Ba khối `Metadata/filament_settings_*.config` còn sót nhưng không còn ai tham
+chiếu — rác chết, không vào g-code. ❌ Không xoá: phải mở nén rồi ghi lại file
+model 24 MB để đổi lấy 0 thay đổi trong bản in.
+
+🔵 Bài học đọc chỉ số: `filament_settings_id` cho biết **trỏ vào đâu**,
+`project_settings.config` cho biết **giá trị thật lúc slice**. Lần trước tôi đọc
+cái đầu rồi kết luận ba slot lạnh — phải đọc cái sau mới chắc.
+
+### Viet tự chỉnh `Novi 0.16 - FIGURE @AC KX` trong slicer — hết bong bàn
+
+Lưu bằng nút save preset trong slicer, không qua `acslicer_tune.py`. Không cần
+backup vì slicer tự ghi.
+
+| Key | Cũ | Mới |
+|---|---|---|
+| `brim_type` | auto_brim | **brim_ears** |
+| `initial_layer_speed` | 50 | **30** |
+| `initial_layer_infill_speed` | 100 | **50** |
+| `initial_layer_print_height` | 0.2 | **0.16** |
+| `wall_loops` | 3 | **4** |
+| `sparse_infill_density` | 18% | **15%** *(= cha, override bị bỏ)* |
+
+🟢 `small_perimeter_threshold`, `wipe_before_external_loop`, `seam_gap` áp sáng
+cùng ngày vẫn còn — slicer không xoá gì của tôi.
+
+### Phân biệt "slicer bỏ key" với "preset bị revert"
+
+Lần lưu này xoá hai key khỏi user preset: `sparse_infill_density` ở process, và
+`textured_plate_temp*` ở `PLA Generic@KX 0.4`. Cả hai **vô hại** — giá trị trùng
+với cha nên slicer không lưu override, giá trị hiệu lực không đổi.
+
+🔵 Cách phân biệt, dùng lại được về sau:
+
+| Dấu hiệu | Nghĩa |
+|---|---|
+| key mất, **giá trị hiệu lực không đổi** | slicer dọn override trùng cha — bình thường |
+| key mất hoặc đổi, **giá trị hiệu lực đổi** | bị ghi đè — điều tra như `058b051` |
+
+Chỉ so nội dung file thì hai ca này giống nhau. Phải flatten cả chuỗi `inherits`
+mới thấy khác. Kiểm chứng: cả hai filament vẫn ra `textured_plate_temp` 60/60.
+
+### Tìm ra chỉnh sửa nằm trong project, không phải preset
+
+Tưởng là preset đã đổi, nhưng mọi file preset còn nguyên mtime của lần ghi trước
+— chỉ `.conf` đổi. Sửa của Viet nằm trong
+`ArticulatedCuteCrab_MultipartBambuStudioA1.3mf`, đọc ra bằng cách unzip và diff
+`Metadata/project_settings.config` với preset đã flatten.
+
+🔴 Phát hiện kèm theo: project đó gán ba trong bốn slot vào **filament clone
+project-local** — tên có đuôi `(...3mf)`, còn giữ nhiệt bàn 50/45,
+`nozzle_temperature_HS = 202`, `filament_max_volumetric_speed = 15`. Ảnh chụp từ
+khoảng 22/08. Bản in vừa rồi hết bong vì nó dùng **slot 1**, slot duy nhất trỏ
+vào preset thật ở 60 °C. In 4 màu trong project này thì ba slot kia vẫn lạnh.
+
+⏳ Gán lại slot 2/3/4 về preset thật: chỉ làm được trong UI, đang treo ở
+`TODO.md`.
+
+## 2026-08-25 *(sáng)*
+
 ### Preset bị revert — khôi phục, và tìm ra bàn nhiệt sai loại
 
 Bản in đẹp hơn nhiều nhưng bong khỏi bàn ở vài vị trí, kèm nhựa cháy đen bám

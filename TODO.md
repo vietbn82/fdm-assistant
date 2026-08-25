@@ -32,7 +32,13 @@ trên mây đè bản local, hoặc slicer ở máy kia đẩy lên.
 
 ## B. Cần Viet chốt
 
-*(trống)*
+### B1 📝 `initial_layer_print_height` cho `Novi 0.12 - FIGURE`
+Bản 0.16 bạn đặt lớp đầu = 0.16, tức bằng chính layer height. Áp logic đó cho
+0.12 thì lớp đầu còn 0.12 mm.
+
+- Đang giữ **0.2** — dày hơn layer height, dung sai bám bàn tốt hơn
+- Muốn thống nhất "lớp đầu = layer height" thì nói, tôi đặt 0.12
+- 🟡 Vừa sửa xong lỗi bong bàn, hạ lớp đầu là đi ngược hướng đó
 
 ---
 

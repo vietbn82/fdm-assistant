@@ -56,6 +56,16 @@ Hai bản, cùng ý đồ, khác layer height. Chọn 0.12 cho model nhỏ nhi�
 | `seam_slope_type` | none | **all** | scarf joint, giấu đường seam |
 | `detect_thin_wall` | 0 | **1** | giữ chi tiết mảnh |
 | `slowdown_for_curled_perimeters` | 0 | **1** | |
+| `brim_type` | auto_brim | **brim_ears** | brim chỉ ở góc/mũi nhọn — bám chỗ cần, gỡ dễ |
+| `initial_layer_speed` | 50 | **30** | chậm hơn = nhựa có thời gian dính bàn |
+| `initial_layer_infill_speed` | 100 | **50** | |
+| `wall_loops` | 2 | **4** | thêm độ bền |
+
+Năm dòng cuối chép từ bản 0.16 sau khi Viet chỉnh và bản in hết bong bàn.
+
+🟡 `initial_layer_print_height` **giữ 0.2**, không chép 0.16 sang. Lớp đầu dày
+hơn layer height cho dung sai bám bàn tốt hơn — hạ xuống đi ngược mục đích đang
+sửa. Chờ Viet chốt.
 
 Kế thừa sẵn: `wall_sequence = inner wall/outer wall` (outer in sau cùng — bề mặt
 đẹp nhất), `outer_wall_acceleration = 2000`, `seam_position = aligned`,
@@ -69,13 +79,25 @@ thứ quyết định tốc độ, nên giá trị của hãng dùng được ng
 | Key | Cha | Đặt | Vì sao |
 |---|---|---|---|
 | `outer_wall_speed` | 60 | **50** | như trên |
-| `sparse_infill_density` | 15% | **12%** | |
 | `ironing_type` | no ironing | **top** | |
 | `ironing_speed` | 30 | **20** | 30 là bào chứ không phải miết |
 | `ironing_spacing` | 0.15 | **0.1** | |
-| `seam_slope_type` | none | **all** | |
+| `seam_slope_type` | none | **external** | |
 | `detect_thin_wall` | 0 | **1** | |
 | `slowdown_for_curled_perimeters` | 0 | **1** | |
+
+Viet tự chỉnh trong slicer ngày 25/08, sau bản in hết bong bàn:
+
+| Key | Cha | Đặt | Vì sao |
+|---|---|---|---|
+| `brim_type` | auto_brim | **brim_ears** | brim chỉ ở góc/mũi nhọn — bám chỗ cần, gỡ dễ |
+| `initial_layer_speed` | 50 | **30** | chậm hơn = nhựa có thời gian dính bàn |
+| `initial_layer_infill_speed` | 100 | **50** | |
+| `initial_layer_print_height` | 0.2 | **0.16** | |
+| `wall_loops` | 3 | **4** | thêm độ bền |
+
+🔵 `sparse_infill_density` giữ 15% — trùng giá trị cha nên slicer không lưu
+override. Trước đó đặt 18%, đã bỏ.
 
 Kế thừa sẵn: `wall_sequence`, `outer_wall_acceleration = 2000`, `seam_position =
 aligned`, `wall_loops = 2`, top/bottom shell **6/4**.
