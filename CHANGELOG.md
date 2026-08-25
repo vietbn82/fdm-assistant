@@ -9,6 +9,11 @@ Diff từng dòng preset nằm ở `git log -- presets/`.
 
 ## 2026-08-25
 
+### B1 chốt: lớp đầu `Novi 0.12 - FIGURE` giữ 0.2
+
+Không chép quy tắc "lớp đầu = layer height" từ bản 0.16 sang. Lớp đầu dày hơn
+layer height cho dung sai bám bàn, và bám bàn là thứ vừa sửa xong.
+
 ### Chép bộ sửa bám bàn sang `Novi 0.12 - FIGURE @AC KX`
 
 Backup `user_backup-tune-set-20260825-220223`.
