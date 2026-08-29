@@ -5,10 +5,11 @@
     "from": "User",
     "inherits": "Anycubic Kobra X 0.4 nozzle",
     "is_custom_defined": "0",
+    "machine_end_gcode": "M400\nG91\nG1 E-6 F1800 ; P16 ha ap suat vung nong chay, chong chay nhua cuoi ban in\nG1 Z5 F600 ; P16 nhac dau in khoi mat in\nG90\nM140 S0 ; turn off heatbed\nM104 S0 ; turn off temperature\nM107;turn off fan\nM84; disable motors\n; disable stepper motors",
     "name": "Anycubic Kobra X 0.4 nozzle - high quality",
     "printer_settings_id": "Anycubic Kobra X 0.4 nozzle - high quality",
     "retract_before_wipe": [
-        "70%"
+        "100%"
     ],
     "retract_restart_extra": [
         "0"
@@ -20,10 +21,13 @@
         "1"
     ],
     "retraction_speed": [
-        "35"
+        "45"
     ],
     "version": "1.3.2606.12",
     "z_hop": [
         "0.4"
+    ],
+    "z_hop_types": [
+        "Normal Lift"
     ]
 }
