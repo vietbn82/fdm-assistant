@@ -1,6 +1,6 @@
 # Process preset — tầng process
 
-Ba profile theo mục đích in. Tầng nào sở hữu gì: `docs/preset-model.md` mục 3.
+Năm profile theo mục đích in. Tầng nào sở hữu gì: `docs/preset-model.md` mục 3.
 
 Quy tắc đặt tên: `Novi {layer height} - {FIGURE|TOOL|TEST} @AC KX`
 
@@ -12,11 +12,15 @@ Quy tắc đặt tên: `Novi {layer height} - {FIGURE|TOOL|TEST} @AC KX`
 |---|---|---|
 | `Novi 0.12 - FIGURE @AC KX` | `0.12mm High Quality @Kobra X` | sắc nét nhất, model nhỏ |
 | `Novi 0.16 - FIGURE @AC KX` | `0.16mm High Quality @Kobra X` | model lớn hơn, vẫn cần sắc nét nhưng 0.12 quá lâu |
+| `Novi 0.20 - FIGURE @AC KX` | 🟡 `0.16mm High Quality @Kobra X` | Viet tạo 25/08, `layer_height = 0.2` — cha lệch, xem B1 |
 | `Novi 0.20 - TOOL @AC KX` | `0.20mm Standard @Kobra X` | chắc, đủ nhanh |
 | `Novi 0.28 - TEST @AC KX` | `0.28mm Standard @Kobra X` | nhanh nhất, bỏ mọi thứ thừa |
 
 Mỗi profile kế thừa preset hãng **đúng layer height của nó**, nên chỉ phải ghi
 đè vài key. Không cái nào chép lại giá trị đã đúng sẵn ở cha.
+
+🟡 Trừ `Novi 0.20 - FIGURE` — xem B1 trong `TODO.md`. Nó cũng chưa có bộ sửa bám
+bàn mà bốn preset kia đã có; đề xuất P12.
 
 🔵 Tốc độ **không** bị hạ xuống cho khớp trần flow của nhựa. Đó là việc của
 filament preset, slicer tự làm lúc slice — xem `docs/preset-model.md` mục 3.
@@ -30,11 +34,37 @@ filament preset, slicer tự làm lúc slice — xem `docs/preset-model.md` mụ
 | `small_perimeter_threshold` | 0 | **20** | ngưỡng 0 mm khiến `small_perimeter_speed = 50%` **không bao giờ chạy** — không đoạn nào đủ điều kiện "chu vi nhỏ". 20 mm chu vi ≈ đường kính 6,4 mm |
 | `wipe_before_external_loop` | 0 | **1** | lau trước khi vào tường ngoài, giấu điểm bắt đầu |
 | `seam_gap` | 10% | **15%** | chừa hở nhiều hơn ở điểm khép vòng, bớt cục nhựa |
-| `skirt_loops` | 0 | **2** | mồi nhựa trước khi vào vật — vị trí in đầu tiên hay thiếu nhựa |
+| `skirt_loops` | 0 | **2** | mồi nhựa trước khi vào vật — vị trí in đầu tiên hay thiếu nhựa. 🔵 **Trừ `Novi 0.16 - FIGURE`** — Viet cố ý bỏ, giữ 0 |
 | `wipe_on_loops` | 0 | **1** | |
 
 🔵 `small_perimeter_threshold` đo theo **chu vi**, không phải bán kính. Lỗ và trụ
 nhỏ hơn ngưỡng in ở 50% tốc độ tường ngoài — đầu đùn kịp bơm trong đoạn ngắn.
+
+---
+
+### Scarf joint — 🔴 đã tắt trên FIGURE (áp lại 29/08)
+
+`seam_slope_type = none` ở cả hai preset FIGURE.
+
+🟡 P11 đặt `none` ngày 26/08, bị revert về `external` ngày 27/08, **áp lại bằng
+P15 ngày 29/08**. Bản in 29/08 chạy có scarf nên không nghiệm thu được gì. Bản in đẹp nhất tới nay
+(`Novi 0.20 - TOOL`, slot 3, 26/08) **không có scarf**; bản bị cục nhựa ở seam
+thì có. Scarf tăng giảm flow dọc đoạn nối, mà `pressure_advance = 0.036` chưa
+hiệu chuẩn — nhiều khả năng scarf đang gây cục nhựa chứ không sửa.
+
+Ba khoá dưới ghi hôm 25/08 giờ là **khoá chết**, giữ lại phòng khi bật scarf lại:
+
+| Key | Cha | Đặt | Vì sao |
+|---|---|---|---|
+| `seam_slope_conditional` | 1 | **0** | 1 = chỉ áp scarf khi điều kiện góc thoả, phần lớn seam bị bỏ qua |
+| `seam_slope_min_length` | 10 | **5** | đường viền ngắn hơn ngưỡng không có scarf; figure chi tiết nhỏ thì đa số dưới 10 mm |
+| `scarf_joint_flow_ratio` | 1 | **0.95** | bớt nhựa ở đoạn chồng của scarf |
+
+🔵 TOOL và TEST để `seam_slope_type = none` — scarf tắt hẳn, ba khoá trên là khoá
+chết ở đó nên không ghi.
+
+🟡 Scarf trên góc nhọn có thể làm cạnh hơi tròn. Thấy cạnh mất sắc thì trả
+`seam_slope_conditional` về 1.
 
 ---
 
@@ -50,10 +80,10 @@ Hai bản, cùng ý đồ, khác layer height. Chọn 0.12 cho model nhỏ nhi�
 | Key | Cha | Đặt | Vì sao |
 |---|---|---|---|
 | `outer_wall_speed` | 60 | **50** | tốc độ tường ngoài quyết định độ sắc |
-| `sparse_infill_density` | 15% | **12%** | figure không chịu lực |
+| `sparse_infill_density` | 15% | **18%** | |
 | `sparse_infill_pattern` | 3dhoneycomb | **gyroid** | |
 | `ironing_type` | no ironing | **top** | mặt trên phẳng |
-| `seam_slope_type` | none | **all** | scarf joint, giấu đường seam |
+| `seam_slope_type` | none | **external** | scarf joint, giấu đường seam |
 | `detect_thin_wall` | 0 | **1** | giữ chi tiết mảnh |
 | `slowdown_for_curled_perimeters` | 0 | **1** | |
 | `brim_type` | auto_brim | **brim_ears** | brim chỉ ở góc/mũi nhọn — bám chỗ cần, gỡ dễ |
@@ -187,30 +217,38 @@ purge, giảm rác đáng kể.
 
 🟢 **Đã bật** cho TOOL và TEST ngày 2026-08-23. FIGURE giữ 0 như mặc định hãng.
 
-### Ma trận flush thật (slicer tự tính, 2026-08-23)
+### Ma trận flush thật (đọc từ gcode, 2026-08-29)
+
+🟢 Nguồn: gcode slicer sinh ra lúc 16:31 ngày 29/08 cho một mẫu 4 màu — chính là
+thứ máy sẽ chạy. Không phải `.conf`, `.conf` chỉ nhớ trạng thái một màu.
 
 Đơn vị mm³, đọc theo hàng: **từ** màu hàng **sang** màu cột.
 
-| từ ↓ / sang → | Red | White | Black | Cyan |
+| từ ↓ / sang → | Beige | White | Black | Matcha |
 |---|---|---|---|---|
-| **Red** | — | **785** | 174 | 142 |
-| **White** | 142 | — | 142 | 142 |
-| **Black** | 388 | **785** | — | 285 |
-| **Cyan** | 214 | 285 | 150 | — |
+| **Beige** `#F7E6DE` | — | 188 | 142 | 169 |
+| **White** `#FFFFFF` | 139 | — | 142 | 174 |
+| **Black** `#000000` | **785** | **785** | — | **635** |
+| **Matcha** `#BBFB98` | 216 | 276 | 203 | — |
 
-Tổng **3634 mm³** nếu chạy đủ 12 lần đổi màu ≈ 4,5 g PLA.
+Tổng **3854 mm³** nếu chạy đủ 12 lần đổi màu ≈ 4,8 g PLA.
 
-🟢 Con số hợp lý, không cần chỉnh. Quy luật rõ ràng: đổi **sang White** đắt nhất
-(785) vì màu sáng bị màu cũ làm bẩn dễ nhất; đổi **từ White** rẻ nhất (142, đúng
-sàn) vì màu đậm phủ lên trắng rất nhanh.
+🔴 **Hàng Black một mình chiếm 2205 mm³ — 57% toàn bộ.** Đổi *từ* đen sang bất kỳ
+màu nào cũng đắt; đổi *sang* đen thì rẻ nhất bảng (142–203). Quy luật cũ vẫn
+đúng, chỉ đổi vai: trước đây White là màu đắt nhất để chuyển sang, giờ cả Beige
+lẫn White đều sáng nên Black thành nút thắt.
 
-🔵 Ước tính trước đó của tôi là 450–650 mm³ cho cặp tối↔sáng — thấp hơn thực tế.
-Slicer tính từ khoảng cách màu và rộng tay hơn. Dùng số của slicer.
+📝 Sắp thứ tự in để **gom các đoạn màu đen lại**, tránh vào ra đen nhiều lần.
+Mỗi lần rời đen tốn 635–785 mm³.
+
+🔴 **Với FIGURE, toàn bộ 3854 mm³ là rác.** `flush_into_objects = 0` và
+`flush_into_infill = 0`, chỉ còn `flush_into_support = 1` mà bản in không phải
+lúc nào cũng có support. Đây là cái giá của mặt ngoài sạch — xem bảng ở trên.
 
 `printer_flush_multiplier = 0.7` ở machine preset là hệ số nhân chung — hạ xuống
 sẽ giảm cả 12 ô cùng lúc, nhưng chỉ nên làm sau khi thấy bản in thật không lem.
 
-🟢 Trước đây toàn bộ 3634 mm³ thành rác vì chỉ `flush_into_support` bật, mà
+🟢 Trước đây toàn bộ lượng purge thành rác vì chỉ `flush_into_support` bật, mà
 support không phải bản in nào cũng có. TOOL và TEST giờ thu hồi được phần lớn.
 
 🟡 `flush_into_objects` nhét nhựa thải vào **phần đặc** của vật thể, không chỉ

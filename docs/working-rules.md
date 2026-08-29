@@ -88,6 +88,21 @@ nào, không dài dòng xin lỗi. Có backup thì rollback trước, giải th�
 **Đưa số liệu** — ghi rõ nguồn: đọc từ config / lấy từ profile hãng / là ước
 lượng. ❌ Không trình bày kinh nghiệm chung như thể đã đo trên máy này.
 
+**Preset trong slicer khác với `presets/` trong git** — 🟢 **slicer thắng**.
+Kho preset đang chạy là nguồn sự thật; `presets/` chỉ là bản sao để theo dõi
+lịch sử. ❌ Không tự khôi phục từ git hay từ `user_backup-*/` để "sửa" lệch.
+Chạy `--export` cho git bám theo slicer, rồi báo cái gì đã đổi.
+
+🔵 Chốt ngày 26/08 sau vụ `058b051` ghi đè loạt sửa ngày 23. Lý do: Viet chỉnh
+trong UI thường xuyên, và không có cách nào phân biệt "cloud sync ghi đè" với
+"Viet vừa đổi ý" chỉ bằng cách nhìn file. Đoán sai theo hướng khôi phục sẽ xoá
+mất việc Viet vừa làm; đoán sai theo hướng giữ thì chỉ mất một bản sửa đã ghi
+trong `CHANGELOG.md` và áp lại được.
+
+🟡 Vẫn phải **báo** khi thấy lệch — giữ không có nghĩa là im lặng. Cách phân biệt
+lệch thật với lệch giả: xem `CHANGELOG.md` mục "Phân biệt slicer bỏ key với
+preset bị revert".
+
 ## 7. Bảo mật
 
 `AnycubicSlicerNext.conf` chứa token cloud đã mã hoá và `current_device_id`.
@@ -103,3 +118,34 @@ Không in ra, không đưa vào `.md`, không commit. Trích `.conf` thì lọc 
 
 `TODO.md` là nguồn duy nhất. Đừng chép danh sách sang chỗ khác, hai bản sẽ lệch.
 Xong việc nào thì chuyển sang `CHANGELOG.md` trong cùng lượt, đừng để tích lại.
+
+## 9. Hai PC, và cloud sync đã tắt trên cả hai
+
+Viet in bằng **2 PC**, cùng tài khoản `855643`. Từ 29/08 cả hai đều đặt
+Preferences → *Auto sync user presets* = **off** (`app.sync_user_preset = False`
+trong `.conf`).
+
+Lý do: ngày 27/08 toàn bộ P8–P11 và P14 bị trả về giá trị cũ, cả `.json` lẫn
+`.info`. Không chứng minh được thủ phạm là cloud hay một lần khôi phục backup cục
+bộ, nên tắt sync là cách cắt bớt bề mặt rủi ro.
+
+Hệ quả phải nhớ:
+
+- ❌ Preset **không** tự lan sang PC kia nữa. Đừng giả định nó đã có bản mới
+- Chuyển tay: copy **cả cặp** `.json` + `.info` từ `presets/` trong git sang
+  `%APPDATA%\AnycubicSlicerNext\user\855643\`. Thiếu `.info` thì preset bị coi là
+  cũ hơn thực tế
+- ❌ Đừng đổi tên `user_backup-*` thành `user` trừ khi cố ý revert — đó là một
+  trong hai giả thuyết cho vụ 27/08
+- 🔴 Chạy `python tools/acslicer_tune.py --check-drift` **ngay trước khi in**.
+  Lần trước mất trọn một bản in mới phát hiện preset đã bị trả về giá trị cũ
+
+## 10. Đổi tên preset
+
+Slicer đổi tên bằng cách ghi file mới và xoá file cũ, đồng thời cập nhật
+`filament_settings_id` / `print_settings_id` bên trong. Sau mỗi lần Viet đổi tên:
+
+- Quét lại `profiles/`, `TODO.md`, `PENDING_APPLY.md`, `docs/` và sửa mọi chỗ nhắc
+  tên cũ
+- ❌ **Không sửa `CHANGELOG.md`.** Mục cũ ghi tên preset lúc thao tác diễn ra;
+  sửa lại là viết lại lịch sử. Thêm một dòng ghi nhận việc đổi tên là đủ

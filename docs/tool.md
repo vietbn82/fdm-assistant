@@ -18,7 +18,7 @@ python tools/acslicer_tune.py --show "<tên preset>"    # giá trị đã giải
 python tools/acslicer_tune.py --audit                  # báo cáo, không ghi
 python tools/acslicer_tune.py --audit --flow           # + tốc độ bị trần flow hạ xuống
 python tools/acslicer_tune.py --audit --fix            # áp sửa, backup trước
-python tools/acslicer_tune.py --set "BBL PLA Lite|filament_max_volumetric_speed=15"
+python tools/acslicer_tune.py --set "PLA Bambulab Lite@KX 0.4|filament_max_volumetric_speed=15"
 ```
 
 Thêm `--yes` để bỏ qua bước xác nhận. `--set` lặp lại được nhiều lần.

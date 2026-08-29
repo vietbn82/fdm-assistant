@@ -11,17 +11,41 @@ Tầng nào sở hữu gì: `docs/preset-model.md` mục 3.
 
 | Slot | Sản phẩm | Màu | Hex | Nạp slot | Mở túi | Preset đang gán |
 |---|---|---|---|---|---|---|
-| 1 | Bambu Lab PLA Lite | Red | `#FF0000` | 2026-08-13 | 2026-08-13 | `PLA BBL Lite@KX 0.4` |
-| 2 | Generic PLA | White | `#FFFFFF` | 2026-08-23 | 2026-08-23 | 🟡 `Anycubic PLA @Kobra X` *(stock)* |
-| 3 | Bambu Lab PLA Lite | Black | `#000000` | 2026-08-13 | 2026-08-13 | `PLA BBL Lite@KX 0.4` |
-| 4 | Bambu Lab PLA Lite | Cyan | `#0080C0` | 2026-08-13 | 2026-08-13 | `PLA BBL Lite@KX 0.4` |
+| 1 | Bambu Lab PLA Lite | Beige *(16700)* | `#F7E6DE` | 2026-08-29 | 2026-08-29 | `PLA Bambulab Lite@KX 0.4` |
+| 2 | Generic PLA | White | `#FFFFFF` | 2026-08-23 | 2026-08-23 | `PLA Generic@KX 0.4` |
+| 3 | Bambu Lab PLA Lite | Black | `#000000` | 2026-08-13 | 2026-08-13 | `PLA Bambulab Lite@KX 0.4` |
+| 4 | Generic PLA | Matcha | `#BBFB98` | 2026-08-26 | 2026-08-26 | `PLA Generic@KX 0.4` |
 
-Hex lấy từ `filament_colors` trong `.conf` — tức màu bạn đã chọn trong UI, không
-phải bảng của hãng. Đó mới là giá trị slicer thật sự dùng để tính flush.
+🟢 **Bốn slot đều đúng, xác nhận 29/08 16:41.** Màu đọc từ `filament_colors` trong
+`.conf` sau khi đóng slicer; preset đọc từ cùng bản ghi đó. Slot 3 Viet xác nhận
+là cuộn BBL Black.
 
-🟡 **Kiểm tra slot 2 đang gán preset nào.** Lần soát trước nó dùng preset stock
-chứ không phải `PLA Generic@KX 0.4`. Gán slot nằm trong state của project, không
-đọc được từ `.conf` — phải nhìn trong UI: tab Filament, slot 2.
+```
+filament_colors = #F7E6DE,#FFFFFF,#000000,#BBFB98
+filament    = PLA Bambulab Lite@KX 0.4    filament_01 = PLA Generic@KX 0.4
+filament_02 = PLA Bambulab Lite@KX 0.4    filament_03 = PLA Generic@KX 0.4
+```
+
+🔵 **Màu đặt trên màn hình cảm ứng của máy in không tới được slicer.** Đã kiểm:
+sau khi đặt trên máy, `.conf` vẫn nguyên màu cũ. Hai kho cấu hình riêng — màn
+hình máy lo trạm nạp nhựa, slicer đọc kho của nó.
+
+🟢 **Đã sửa xong lỗi preset stock ở slot 2 và 4 (29/08).** Trước đó hai slot đó
+gán `Anycubic PLA @Anycubic Kobra X 0.4 nozzle`, hỏng ba thứ cùng lúc:
+
+| | stock `Anycubic PLA @…` | preset đã chỉnh |
+|---|---|---|
+| `nozzle_temperature_HS` | 🔴 220 | 205 |
+| `filament_flow_ratio` | 🔴 0.96 | 1.0 |
+| `filament_retraction_length` | 🔴 0.8 — đè lên machine | `nil` → theo machine 1.2 |
+
+🔴 Dòng thứ ba đáng nhớ nhất: `filament_retraction_length` ở tầng filament
+**thắng** `retraction_length` ở tầng machine. Preset nhựa nào đặt số cứng ở đó
+sẽ vô hiệu hoá mọi tinh chỉnh retraction ở tầng máy. Hai preset đang dùng đều để
+`nil` — giữ nguyên như vậy.
+
+🔴 **Flush đắt hơn trước.** Slot 1 beige gần trắng, slot 3 đen — cặp tối↔sáng cực
+đại. Rời khỏi đen tốn 635–785 mm³ mỗi lần; xem ma trận trong `profiles/process.md`.
 
 **Mỗi slot theo dõi riêng.** Thay cuộn ở slot 2 thì chỉ sửa dòng 2 — ba slot kia
 giữ nguyên ngày của chúng.
@@ -38,14 +62,14 @@ vẫn hút ẩm y như cuộn để trên bàn — tháo ra lắp lại không r
 mở lâu rồi mới lắp vào máy thì hai ngày này lệch xa nhau, và cột bên phải mới
 là cột đáng tin.
 
-📝 Mã hex còn thiếu — cần để tính `flush_volumes_matrix` 4×4. Cặp tối↔sáng
-(Black ↔ White) tốn nhiều nhựa purge hơn hẳn cặp cùng tông.
+🟢 Đủ bốn hex, `flush_volumes_matrix` 4×4 đã tính xong — bảng trong
+`profiles/process.md`.
 
 ## Độ ẩm
 
-🟡 **Không có máy sấy nhựa.** Slot 2 mở hôm nay, ba slot còn lại mở 2026-08-13
-— đều dưới một tháng nên hiện chưa phải vấn đề. PLA đóng gói kín kèm gói hút ẩm
-thường khô sẵn.
+🟡 **Không có máy sấy nhựa.** Tính đến 2026-08-29: slot 1 mở hôm nay, slot 4 mở
+26/08, slot 2 mở 23/08, slot 3 mở 13/08 — đều dưới một tháng nên hiện chưa phải
+vấn đề. PLA đóng gói kín kèm gói hút ẩm thường khô sẵn.
 
 Cần biết vì ẩm gây ra triệu chứng **nhìn hệt lỗi setting**: stringing, bề mặt
 rỗ, tiếng lách tách khi đùn, lớp bám kém. Chỉnh preset để chữa mấy thứ đó là
@@ -69,22 +93,23 @@ Không có máy sấy thì:
 
 ## Preset
 
-### `PLA BBL Lite@KX 0.4` — slot 1, 3, 4
+### `PLA Bambulab Lite@KX 0.4` — slot 1, 3
 
 Gộp từ hai preset cũ (`BBL PLA Lite` và `BBL PLA Lite @Anycubic Kobra X 0.4
-nozzle`) — mỗi cái giữ một nửa thông tin, không cái nào đủ.
+nozzle`) — mỗi cái giữ một nửa thông tin, không cái nào đủ. Đổi tên từ
+`PLA BBL Lite@KX 0.4` sang tên hiện tại ngày 29/08.
 
 | Key | Giá trị |
 |---|---|
-| `filament_max_volumetric_speed` | 13 *(hãng)* ⏳ chưa đo |
-| `filament_flow_ratio` | 0.98 |
+| `filament_max_volumetric_speed` | 13 *(kế thừa, chưa đo)* |
+| `filament_flow_ratio` | **1.0** *(P14, áp lại bằng P15 ngày 29/08)* |
 | `filament_density` / `filament_vendor` | 1.3 / BambuLab |
-| `nozzle_temperature_HS` / `_initial_layer_HS` | 212 / 212 |
+| `nozzle_temperature_HS` / `_initial_layer_HS` | **205 / 210** |
 | `nozzle_temperature_range_high` | 215 |
-| `pressure_advance` / `adaptive_pressure_advance` | 0.036 / tắt |
-| **`textured_plate_temp` / `_initial_layer`** | **60 / 60** ← bàn đang dùng |
+| `pressure_advance` / `adaptive_pressure_advance` | 0.036 *(kế thừa)* / tắt |
+| **`textured_plate_temp` / `_initial_layer`** | **60 / 60** *(kế thừa)* ← bàn đang dùng |
 | `hot_plate_temp` / `_initial_layer` | 50 / 60 *(không dùng)* |
-| `fan_min_speed_HS` / `fan_max_speed_HS` | 60 / 90 |
+| `fan_min_speed_HS` / `fan_max_speed_HS` | 60 / 90 *(kế thừa)* |
 | `overhang_fan_threshold` | 25% |
 | `close_fan_the_first_x_layers` | 2 |
 | `filament_retraction_length` / `_wipe_distance` | `nil` → theo machine |
@@ -97,12 +122,17 @@ sửa nhầm cặp đó thì không có gì xảy ra cả.
 🔵 Cả hai khoá textured đã bị revert về 45/50 ngày 24/08, gây bong bàn. Khôi phục
 60/60 ngày 25/08 — trùng đúng giá trị hãng.
 
-### `PLA Generic@KX 0.4` — slot 2
+🔵 Đổi tên từ `PLA BBL Lite@KX 0.4` sang tên hiện tại ngày 29/08. Các mục cũ
+trong `CHANGELOG.md` vẫn giữ tên cũ — đó là tên preset lúc thao tác diễn ra.
+
+### `PLA Generic@KX 0.4` — slot 2, 4
 
 | Key | Giá trị |
 |---|---|
+| `filament_flow_ratio` | **1.0** *(P14, áp lại bằng P15)* |
 | `filament_max_volumetric_speed` | 13 — mặc định hãng |
 | `nozzle_temperature_HS` | 205 |
+| `nozzle_temperature_initial_layer_HS` | **210** *(P18, 29/08)* |
 | `nozzle_temperature_range_high` | 220 |
 | **`textured_plate_temp` / `_initial_layer`** | **60 / 60** ← bàn đang dùng |
 | `overhang_fan_threshold` | 25% |
@@ -114,7 +144,11 @@ sửa nhầm cặp đó thì không có gì xảy ra cả.
 🔵 Nhiệt bàn cũng bị revert về 45/55, khôi phục 60/60 ngày 25/08 cùng lúc với
 BBL. Cùng một lỗi, cùng một cách sửa.
 
+🔵 P18 (29/08): trước đó preset chỉ đè `nozzle_temperature_HS`, quên bản
+`_initial_layer_HS`, nên lớp đầu in ở **220** trong khi các lớp sau 205. Giờ 210,
+khớp với preset BBL.
+
 Cả hai kế thừa `Anycubic PLA @Anycubic Kobra X 0.4 nozzle`.
 
-⏳ A1 trong `TODO.md`: in thử để xác nhận trần flow **13** có đủ không. 13 là
-mặc định hãng; 15 là trần Bambu công bố, cả hai đều chưa đo trên hotend này.
+🔵 Trần flow **13** đã đóng lại ngày 26/08: nó chỉ hạ *tốc độ* khi chạm trần,
+không làm tường mỏng đi. Thủ phạm thiếu nhựa là `filament_flow_ratio`.

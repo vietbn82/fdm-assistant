@@ -24,7 +24,7 @@ cộng một dòng trỏ về preset cha:
 
 ```json
 {
-  "name": "BBL PLA Lite @Anycubic Kobra X 0.4 nozzle",
+  "name": "PLA Bambulab Lite@KX 0.4",
   "inherits": "Anycubic PLA @Anycubic Kobra X 0.4 nozzle",
   "filament_max_volumetric_speed": ["15"],
   "hot_plate_temp": ["50"]
@@ -118,8 +118,8 @@ Nó nạp toàn bộ preset vào RAM lúc khởi động và ghi đè xuống đ
 file khi slicer đang mở = mất trắng khi nó đóng. Luôn đóng slicer trước.
 
 **Bẫy 2 — `filament\base\` chứa file trùng tên với preset thật.**
-`filament\base\BBL PLA Lite @Kobra X.json` và `filament\BBL PLA Lite @Kobra X.json`
-có cùng `"name"` bên trong. Bản trong `base\` là ảnh chụp cache đầy đủ; bản
+`filament\base\PLA Bambulab Lite@KX 0.4.json` và
+`filament\PLA Bambulab Lite@KX 0.4.json` có cùng `"name"` bên trong. Bản trong `base\` là ảnh chụp cache đầy đủ; bản
 top-level mới là preset sống. Đọc nhầm sẽ ra giá trị cũ.
 
 **Bẫy 3 — sửa `.json` mà quên `.info` thì cloud sync khôi phục lại bản cũ.**

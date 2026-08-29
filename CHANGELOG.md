@@ -7,7 +7,607 @@ Diff từng dòng preset nằm ở `git log -- presets/`.
 
 ---
 
+## 2026-08-29
+
+### P19 P20 P21 🟢 áp
+
+Backup `user_backup-tune-set-20260829-182807`. Áp cho **cả hai** preset FIGURE.
+
+| Key | Cũ | Mới | Nhắm vào |
+|---|---|---|---|
+| `reduce_crossing_wall` | 0 *(kế thừa)* | **1** | tơ — travel không còn cắt ngang qua vật |
+| `max_travel_detour_distance` | 0 *(kế thừa)* | **40** | trần cho đường vòng, tránh travel dài vô lý |
+| `ironing_flow` | 8% | **10%** | mặt trên xước — trả về giá trị cha |
+| `top_surface_speed` | 150 *(kế thừa)* | **80** | mặt trên xấu |
+
+`--audit`: 0 lỗi. Đã đọc lại file xác nhận cả 8 lần ghi.
+
+❌ **P6 và P22 không nằm trong lượt này** — Viet chỉ duyệt P19, P20, P21.
+
+### P22 đóng — `skirt_loops = 0` và `prime_tower_width = 10` là cố ý
+
+Viet xác nhận đã tự đặt hai giá trị đó trên `Novi 0.16 - FIGURE @AC KX`. Không
+phải regression, không phải slicer xoá mất. Gỡ P22 khỏi `PENDING_APPLY.md`.
+
+🔵 Ghi vào `profiles/process.md` để lần soát sau không báo lại: bảng "áp cho cả
+bốn profile" giờ có ngoại lệ ở dòng `skirt_loops`.
+
+🟡 Bài học cho tôi: thấy một khoá biến mất khỏi preset thì **hỏi trước khi gọi là
+regression**. Lần 27/08 là revert thật, lần này là Viet cố ý — nhìn diff không
+phân biệt được. Đúng tinh thần mục 6 `docs/working-rules.md`: slicer thắng.
+
+
+### Bản in 29/08 17:00 — `Parametric_Model_Maker_1`, kết quả xấu
+
+Nguồn: `Temp\ACGcode3mf\9527\0829-1700-Plate 1(01)_PLA_0.16_41m24s.gcode.3mf`,
+đọc `Metadata/project_settings.config` và `slice_info.config`.
+
+| | |
+|---|---|
+| Mẫu | `Parametric_Model_Maker_1`, Plate 1 |
+| Thời gian / khối lượng | 41m24s, 6,42 g |
+| process | `Novi 0.16 - FIGURE @AC KX` *(có sửa chưa lưu — xem dưới)* |
+| machine | `Anycubic Kobra X 0.4 nozzle - high quality` |
+| filament | `PLA Generic@KX 0.4` × 2 — matcha `#BAFB97` 3,69 g + white `#FFFFFF` 2,73 g |
+
+🔴 **Đây là bản in 2 màu**, không phải 1 màu. Dùng slot 2 và slot 4, **không dùng
+BBL**.
+
+🟢 **P15, P16, P18 đều có hiệu lực trong bản in này** — đọc từ chính file gcode:
+
+```
+retraction_length 1.2   retraction_speed 45   retract_before_wipe 100%
+z_hop_types Normal Lift  seam_slope_type none  filament_flow_ratio 1,1
+nozzle_temperature 205,205   _initial_layer 210,210   ironing_flow 8%
+```
+
+Nên ba triệu chứng còn lại **không phải do preset bị revert**. Nguyên nhân nằm ở
+những khoá chưa ai đụng tới.
+
+### Sáu khoá chưa đụng, giải thích cả ba triệu chứng
+
+| # | Khoá | Giá trị | Gây ra |
+|---|---|---|---|
+| 1 | `reduce_crossing_wall` | 0 *(kế thừa)* | tơ — travel cắt thẳng qua vật, mỗi layer 2 lần đi prime tower |
+| 2 | `prime_tower_width` | 10 *(cha 30)* | tơ, lem màu — diện tích lau nhỏ 9 lần |
+| 3 | `skirt_loops` | 🔴 0 — **bị xoá** | đường in đầu thiếu nhựa |
+| 4 | `retraction_minimum_travel` | 1 | tơ **và** xước — không rút thì cũng không z-hop |
+| 5 | `ironing_flow` | 8% *(cha 10%)* | mặt trên xước |
+| 6 | `top_surface_speed` | 150 *(kế thừa)* | mặt trên xấu |
+
+🔴 **Khoá 4 là mấu chốt cho triệu chứng 3.** Z-hop chỉ xảy ra **kèm theo
+retraction**. Travel ngắn hơn 1 mm không rút, nên cũng không nhấc đầu in — nozzle
+rê ngang qua mặt vừa in. Mặt trên đầy travel ngắn.
+
+🔴 **Khoá 5 là mấu chốt còn lại.** Triệu chứng "mặt trên bị xước" là **mới**, và
+`ironing_flow = 8%` cũng **mới** — bản 29/08 là lần đầu nó thật sự chạy. Là hoạt
+động bằng cách rê nozzle trên một lớp nhựa mỏng; bớt 20% lớp đó thì nozzle cạ
+thẳng vào mặt in.
+
+Ghi thành P19–P22, và gỡ chặn P6.
+
+### `Novi 0.16 - FIGURE` mất `skirt_loops` trong phiên slicer 16:59
+
+Git commit `95f8911`:
+
+```
++    "prime_tower_width": "10",
+-    "seam_slope_type": "none",
+-    "skirt_loops": "2",
+```
+
+- `seam_slope_type` mất là **vô hại** — trùng giá trị cha nên slicer bỏ override.
+  Giá trị hiệu dụng vẫn `none`
+- 🔴 `skirt_loops` mất là **mất thật** — cha để 0. `Novi 0.12 - FIGURE` vẫn còn 2,
+  hai preset giờ lệch nhau
+- 🔴 `prime_tower_width = 10` là khoá mới, chưa từng bàn
+
+🟡 Ngoài ra project dùng `brim_type = auto_brim` trong khi preset ghi `brim_ears`
+— tức plate mang **sửa đổi chưa lưu vào preset**. Bài học: `project_settings.config`
+trong `.gcode.3mf` mới là thứ đã in, preset trên đĩa chỉ là điểm xuất phát.
+
+
+### A7 🟢 — bốn slot đã đúng preset
+
+Viet gán lại trong slicer rồi slice lại. Đọc `.conf` sau khi đóng slicer (16:41):
+
+```
+filament_colors = #F7E6DE,#FFFFFF,#000000,#BBFB98
+filament    = PLA Bambulab Lite@KX 0.4    filament_01 = PLA Generic@KX 0.4
+filament_02 = PLA Bambulab Lite@KX 0.4    filament_03 = PLA Generic@KX 0.4
+```
+
+| Slot | Nhựa | Màu | Preset |
+|---|---|---|---|
+| 1 | BBL PLA Lite | Beige | `PLA Bambulab Lite@KX 0.4` |
+| 2 | Generic PLA | White | `PLA Generic@KX 0.4` |
+| 3 | BBL PLA Lite | Black *(Viet xác nhận)* | `PLA Bambulab Lite@KX 0.4` |
+| 4 | Generic PLA | Matcha | `PLA Generic@KX 0.4` |
+
+🟢 Không còn slot nào dùng preset stock. `filament_retraction_length` giờ là `nil`
+ở cả hai preset, nên `retraction_length = 1.2` ở tầng machine áp cho cả bốn slot.
+
+### Đổi tên `PLA BBL Lite@KX 0.4` → `PLA Bambulab Lite@KX 0.4`
+
+Viet đổi trong slicer. Slicer ghi file mới, xoá file cũ, cập nhật
+`filament_settings_id` bên trong — đã kiểm cả ba.
+
+Đã quét và sửa tên trong: `profiles/filament.md`, `TODO.md`, `PENDING_APPLY.md`,
+`docs/preset-model.md`, `docs/tool.md`.
+
+❌ **`CHANGELOG.md` giữ nguyên tên cũ.** Các mục trước ghi tên preset đúng như lúc
+thao tác diễn ra; sửa lại là viết lại lịch sử. Ghi thành quy tắc: `docs/working-rules.md`
+mục 10.
+
+### P18 🟢 áp — lớp đầu preset Generic về 210 °C
+
+Backup `user_backup-tune-set-20260829-164420`.
+
+| Preset | Key | Cũ | Mới |
+|---|---|---|---|
+| `PLA Generic@KX 0.4` | `nozzle_temperature_initial_layer_HS` | 220 *(kế thừa)* | **210** |
+
+Preset chỉ đè `nozzle_temperature_HS = 205`, quên bản `_initial_layer_HS`, nên lớp
+đầu chạy 220 — chênh 15 °C so với các lớp sau, và chạm đúng trần
+`nozzle_temperature_range_high = 220`. Giờ khớp với preset BBL.
+
+### P17 🟢 — cloud sync tắt trên cả hai PC
+
+Viet tắt *Auto sync user presets* trên PC còn lại. PC này vẫn `False`. Không PC
+nào còn đường ghi đè preset của PC kia.
+
+🟡 Đánh đổi: preset không tự lan sang PC kia nữa. Chuyển tay thì copy **cả cặp**
+`.json` + `.info` từ `presets/` trong git. Ghi thành quy tắc thường trực:
+`docs/working-rules.md` mục 9.
+
+
+### A6 đóng — đọc slot map và ma trận flush từ gcode thật
+
+Viet slice một mẫu 4 màu. Đọc thẳng gcode slicer vừa sinh
+(`Temp\anycubicslicer_model\...\Metadata\.24448.0.gcode`, 16:31) thay vì `.conf` —
+đây là thứ máy sẽ chạy, không phải ảnh chụp trạng thái.
+
+```
+; filament_colour      = #F7E6DE;#FFFFFF;#000000;#BBFB98
+; filament_settings_id = "PLA BBL Lite@KX 0.4";"Anycubic PLA @…";"PLA Generic@KX 0.4";"Anycubic PLA @…"
+; nozzle_temperature   = 205,220,205,220
+; filament_flow_ratio  = 1,0.96,1,0.96
+; filament_retraction_length = nil,0.8,nil,0.8
+```
+
+🟢 **Bốn màu đã đúng cả** — beige `#F7E6DE` và matcha `#BBFB98` đặt xong.
+
+🔴 **Slot 2 và slot 4 dùng preset stock, hỏng ba thứ cùng lúc:** 220 °C thay vì
+205, flow 0.96 thay vì 1.0, và `filament_retraction_length = 0.8` **đè lên**
+`retraction_length = 1.2` ở tầng machine. Đúng cái hồi quy đã ghi hồi 24/08 — khoá
+retraction ở tầng filament thắng tầng machine. Ba thứ đều đẩy về hướng tơ. Xem A7.
+
+🟡 Slot 3 nạp BBL PLA Lite Black nhưng gán `PLA Generic@KX 0.4`.
+
+### P15 và P16 xác nhận trong gcode thật
+
+Không chỉ đọc lại file preset — đọc gcode để chắc slicer thật sự dùng:
+
+```
+; retraction_speed  = 45      ; retract_before_wipe = 100%
+; z_hop_types = Normal Lift   ; seam_slope_type = none
+; retraction_length = 1.2     ; filament_flow_ratio = 1,…,1,…
+```
+
+Và P16 nằm trong dòng lệnh thật, không chỉ trong khối config:
+
+```
+314788:G1 E-6 F1800 ; P16 ha ap suat vung nong chay, chong chay nhua cuoi ban in
+```
+
+### Ma trận flush thật, 4 màu mới
+
+Đã thay bảng cũ trong `profiles/process.md`. Tổng **3854 mm³ ≈ 4,8 g** cho 12 lần
+đổi màu.
+
+🔴 Hàng Black chiếm 2205 mm³ — **57% toàn bộ**. Rời khỏi đen tốn 635–785 mm³ mỗi
+lần; vào đen thì rẻ nhất bảng. Sắp thứ tự in để gom các đoạn đen lại.
+
+🔴 Với FIGURE toàn bộ số đó là rác: `flush_into_objects = 0`, `flush_into_infill = 0`.
+
+### A4 🟢 — đã tắt *Auto sync user presets* trên PC còn lại
+
+Viet xác nhận. PC này vẫn `sync_user_preset = False`. Không PC nào còn đường ghi
+đè preset của PC kia qua cloud.
+
+🟡 Đổi lại: PC kia không nhận preset mới tự động nữa. Muốn đồng bộ thì copy cả cặp
+`.json` + `.info` từ `presets/` trong git sang `%APPDATA%\AnycubicSlicerNext\user\855643\`.
+
+
+### P15 🟢 áp — bộ sửa tơ + seam trở lại đĩa
+
+Backup `user_backup-tune-set-20260829-161325`. Đã đọc lại file xác nhận cả 11 khoá.
+
+| Preset | Key | Cũ | Mới |
+|---|---|---|---|
+| machine | `retraction_speed` | 35 | **45** |
+| machine | `retract_before_wipe` | 70% | **100%** |
+| machine | `z_hop_types` | *(kế thừa Slope Lift)* | **Normal Lift** |
+| 2× FIGURE | `seam_slope_type` | external | **none** |
+| 2× FIGURE | `ironing_flow` | *(kế thừa 10%)* | **8%** |
+| 2× FIGURE | `ironing_inset` | *(kế thừa 0)* | **0.2** |
+| 2× filament | `filament_flow_ratio` | 0.98 | **1.0** |
+
+### P16 🟢 áp — retract ở cuối `machine_end_gcode`
+
+Backup `user_backup-tune-p16-endgcode-20260829-161405`.
+
+```
+M400
+G91
+G1 E-6 F1800 ; P16 ha ap suat vung nong chay, chong chay nhua cuoi ban in
+G1 Z5 F600 ; P16 nhac dau in khoi mat in
+G90
+M140 S0 ; turn off heatbed
+M104 S0 ; turn off temperature
+M107;turn off fan
+M84; disable motors
+; disable stepper motors
+```
+
+🔴 **Không dùng `--set` được, và đây là một cái bẫy thật.** `machine_end_gcode` là
+**chuỗi** ở preset cha, nhưng `--set` bọc mọi giá trị machine/filament vào list khi
+user preset chưa sở hữu khoá đó (`d[key] = [val] if kind in (filament, machine)
+and not isinstance(old, str)`). `old` là `None` nên nó sẽ ghi
+`["M400\nG91\n..."]` — sai kiểu, slicer đọc không ra.
+
+Đã ghi bằng script riêng gọi thẳng `acslicer_tune.write_preset()` nên vẫn có
+backup `user\` và vẫn bump `.info`. Đã đọc lại: kiểu `str` ✅.
+
+📝 Chưa nghiệm thu — xem C2 trong `TODO.md`, có sẵn lệnh revert.
+
+### 🔴 Sửa lại kết luận về nguyên nhân revert: chưa chứng minh được là do PC thứ hai
+
+Giả thuyết hai PC ghi ở mục trên **nghe hợp lý nhưng không đứng vững** sau khi
+soát thêm. Hai bằng chứng ngược:
+
+**1. PC này đang tắt đồng bộ user preset.** `.conf`:
+
+```
+app.sync_user_preset  = False
+app.sync_system_preset = True
+```
+
+Tắt thì PC này không đẩy lên — nhưng cũng không kéo về. Log phiên
+28/08 21:58 → 29/08 15:33 không có một dòng nào về sync preset.
+
+**2. Trạng thái bị revert trùng byte với một backup cục bộ.** So `user\` ngay
+trước P15 với từng thư mục backup:
+
+| Backup | Khác gì |
+|---|---|
+| `user_backup-tune-set-20260826-205206` | 🔴 **chỉ khác đúng 2 file Test1** *(tạo sau)*, còn lại giống hệt |
+| `user_backup-tune-set-20260826-211029` | khác machine + 2 process + filament |
+| `user_backup-tune-set-20260825-2*` | khác nhiều |
+
+`-205206` chính là backup `acslicer_tune.py` chụp **ngay trước khi áp P8–P11**.
+Tức trạng thái bị revert = đúng ảnh chụp trước P8, không sai một byte.
+
+🟡 Hai cơ chế cùng khớp, không phân biệt được từ file:
+
+- **Cloud kéo về.** PC này không đẩy lên, nên bản trên cloud vĩnh viễn là bản
+  trước P8. Bất kỳ lần pull nào cũng trả về đúng ảnh đó
+- **Khôi phục backup cục bộ.** Ai đó đổi tên `user_backup-tune-set-20260826-205206`
+  thành `user`, đúng quy trình revert ghi trong `docs/tool.md`
+
+Log chỉ lùi tới 28/08 nên sự kiện 27/08 không còn dấu vết. ❌ Không kết luận được.
+
+🟢 **May là cách xử lý không đổi theo nguyên nhân:** đọc lại preset từ đĩa ngay
+trước khi in. Đã thành bước bắt buộc trong C1.
+
+### Không có chế độ "chỉ kéo về, không đẩy lên"
+
+Viet hỏi làm sao để PC thứ hai chỉ nhận preset chứ không đẩy. 🔴 Slicer không có
+tuỳ chọn đó. `sync_user_preset` là **một công tắc hai chiều** — Preferences →
+*Auto sync user presets*. Bật thì cả đẩy lẫn kéo; tắt thì không cái nào.
+
+Cách gần nhất: tắt trên PC kia, rồi chuyển preset sang bằng tay từ `presets/`
+trong git. Ghi thành P17 mới.
+
+### Nguyên nhân revert: hai PC cùng một tài khoản cloud
+
+Viet in bằng **2 PC**, cả hai đăng nhập user id `855643`. PC còn lại không có ai
+theo dõi preset nên vẫn giữ bộ 24–25/08.
+
+| Bước | Xảy ra gì |
+|---|---|
+| 1 | PC này áp P8–P14 vào 26/08, `updated_time` nhảy lên 26/08 |
+| 2 | PC kia mở slicer, mang theo bộ preset cũ **và `.info` cũ của nó** |
+| 3 | Sync đẩy bộ cũ lên cloud |
+| 4 | PC này mở slicer, kéo về, `.json` + `.info` bị thay cả cặp |
+
+🟢 Giải thích được chi tiết khó nhất: `updated_time` **lùi về** 24/08 11:35 và
+25/08 22:10. Trên một máy đơn không có cơ chế nào làm được — slicer flush RAM chỉ
+ghi `.json`. File đến từ máy khác thì mới mang theo sidecar cũ.
+
+🟢 Cũng giải thích vì sao cả năm đề xuất chết cùng lúc: sync không xét từng khoá,
+nó thay **nguyên file**.
+
+Cách chặn: [P17](PENDING_APPLY.md#p17), Viet chưa chốt.
+
+### A5 — xoá `Novi 0.16 Test1- FIGURE @AC KX`
+
+Backup `user_backup-delete-test1-20260829-155923`. Xoá cả `.json` và `.info`.
+Kho user còn 8 preset: 2 filament, 1 machine, 5 process.
+
+🟡 Nếu PC kia còn đăng nhập, cloud có thể dựng lại preset này ở lần mở slicer sau.
+Kiểm tra lại sau khi chốt P17.
+
+### Màu nhựa: màn hình máy in không nói chuyện với slicer
+
+Viet đặt màu cuộn beige bằng màn hình cảm ứng trên máy. Đóng slicer lúc 15:33 rồi
+đọc `.conf`:
+
+```
+filament_colors = #FF0000,#FF0000,#FFFFFF,#000000
+```
+
+Không có beige. 🔴 Hai kho cấu hình riêng — màn hình máy lo trạm nạp nhựa,
+`filament_colors` trong `.conf` mới là số slicer đọc để tính
+`flush_volumes_matrix`. Phải đặt trong slicer, tab Filament.
+
+### `.conf` báo gán slot lệch `profiles/filament.md` ở 3/4 dòng
+
+| Slot | `.conf` — preset | `.conf` — màu | `profiles/filament.md` |
+|---|---|---|---|
+| 1 | `PLA BBL Lite@KX 0.4` | `#FF0000` | BBL, Red ✅ |
+| 2 | 🔴 `Anycubic PLA @…` *(stock)* | `#FF0000` | Generic PLA, White |
+| 3 | 🔴 `PLA Generic@KX 0.4` | `#FFFFFF` | BBL, Black |
+| 4 | 🔴 `Anycubic PLA @…` *(stock)* | `#000000` | Generic PLA, Matcha |
+
+🟡 Bản in 29/08 Viet gọi là "BBL slot 3", nhưng `.conf` bảo slot 3 gán
+`PLA Generic@KX 0.4`. Nếu `.conf` đúng thì bản in đó chạy sai cả preset nhựa —
+thêm một nguyên nhân tơ chồng lên chuyện revert. Chưa phân xử được từ file:
+A6 trong `TODO.md`.
+
+### Cloud sync đã revert toàn bộ P8 P9 P10 P11 P14
+
+Bản in `Novi 0.16 - FIGURE @AC KX` ngày 29/08 (BBL, slot 3) vẫn còn tơ nhiều.
+Soát đĩa trước khi kết luận thì thấy **bộ sửa không còn ở đó**.
+
+Đối chiếu `presets/` trong git — commit `6f48059` (26/08) áp, commit `2316edd`
+(27/08) trả lại hết:
+
+| Preset | Key | P8–P14 đặt | Trên đĩa 29/08 |
+|---|---|---|---|
+| machine | `retraction_speed` | 45 | 🔴 35 |
+| machine | `retract_before_wipe` | 100% | 🔴 70% |
+| machine | `z_hop_types` | Normal Lift | 🔴 khoá bị xoá |
+| 2× FIGURE | `seam_slope_type` | none | 🔴 external |
+| 2× FIGURE | `ironing_flow` / `ironing_inset` | 8% / 0.2 | 🔴 khoá bị xoá |
+| 2× filament | `filament_flow_ratio` | 1.0 | 🔴 0.98 |
+
+Không sót cái nào. Cả năm đề xuất bị xoá cùng một lúc.
+
+**Cơ chế: cloud sync, không phải slicer flush.** Bằng chứng nằm ở `.info`.
+`acslicer_tune.py` bump `updated_time` lên thời điểm ghi mỗi lần `--set`, nên sau
+lần áp 26/08 ba sidecar phải mang mốc 26/08. Thực tế đọc được:
+
+| Sidecar | `updated_time` | |
+|---|---|---|
+| machine | 1787546119 | 2026-08-24 11:35 |
+| `Novi 0.16 - FIGURE` | 1787670644 | 2026-08-25 22:10 |
+| `PLA BBL Lite@KX 0.4` | 1787629803 | 2026-08-25 10:50 |
+
+Sidecar bị lùi về trước ngày áp, tức **cả cặp `.json` + `.info` bị thay bằng bản
+cũ hơn** — slicer flush state trong RAM thì không làm được chuyện đó, nó chỉ ghi
+`.json`. Cả ba đều mang `sync_info = update`.
+
+🔴 Hệ quả cho quy trình: **bump `updated_time` không đủ để thắng cloud sync.**
+Non-negotiable số 3 trong `CLAUDE.md` là điều kiện cần, không phải điều kiện đủ.
+Ghi vào đĩa trong khi tài khoản còn đăng nhập là ghi vào chỗ có thể bị đè bất kỳ
+lúc nào. Đề xuất P17 xử lý.
+
+🟡 Hệ quả cho C1: bản in 29/08 **không nghiệm thu được gì**. Nó chạy bằng cấu
+hình trước 26/08, nên "còn tơ" không phủ nhận P8–P11 — chỉ nói P8–P11 chưa từng
+chạy. C1 phải in lại sau P15.
+
+### Soát ba triệu chứng của bản in 29/08
+
+| # | Triệu chứng | Nguyên nhân đọc được từ preset |
+|---|---|---|
+| 1 | còn tơ nhiều | bộ sửa tơ đã bị revert — xem trên |
+| 2 | nhựa thừa kéo dài ở chỗ ngắt | `seam_slope_type = external` vẫn bật + `pressure_advance = 0.036` chưa hiệu chuẩn |
+| 3 | sợi nhựa ~5 cm ở nozzle đầu và cuối bản in | `machine_end_gcode` không có lệnh retract nào |
+
+Triệu chứng 3 tách làm hai vế khác hẳn nhau:
+
+- **Cuối bản in** — `machine_end_gcode` đi thẳng `M400` → `M140 S0` → `M104 S0`.
+  Nozzle đầy nhựa nóng đang chịu áp rồi nguội dần trong vài phút. Sửa được: P16.
+- **Đầu bản in** — `machine_start_gcode` chỉ có `G9111`. Macro nằm trong firmware,
+  tự gia nhiệt / home / cân bàn / mồi. Nozzle đứng ở nhiệt in suốt quá trình đó.
+  ❌ Không sửa được từ preset.
+
+### Phát hiện preset process thứ 6: `Novi 0.16 Test1- FIGURE @AC KX`
+
+Kho có 6 process preset, `profiles/process.md` chỉ mô tả 5. Preset thừa là bản
+copy của `Novi 0.16 - FIGURE` với `sparse_infill_pattern = lightning`,
+`sparse_infill_density = 8%`, `top_shell_layers = 4`, và **thiếu** `brim_type`,
+`outer_wall_speed`, `small_perimeter_threshold`, `wall_loops`, `seam_gap`.
+
+📝 Chưa xử lý — chờ Viet nói giữ hay xoá. Xem A5 trong `TODO.md`.
+
+### `profiles/` lệch đĩa ở bốn chỗ
+
+Đọc lại toàn bộ chuỗi kế thừa và đối chiếu:
+
+| File | Ghi | Thực tế |
+|---|---|---|
+| `profiles/printer.md` | `retraction_length = 1` | 1.2 |
+| `profiles/printer.md` | `retraction_minimum_travel = 2` | 1 |
+| `profiles/printer.md` | *(không nhắc)* | `retract_before_wipe = 70%` |
+| `profiles/filament.md` | `nozzle_temperature_HS = 212` | 205, initial layer 210 |
+
+🔵 Ngược lại, mấy khoá `profiles/filament.md` ghi là "đang đặt" mà không thấy
+trong file user preset — `filament_max_volumetric_speed = 13`,
+`pressure_advance = 0.036`, `textured_plate_temp = 60/60`, `fan_min/max_speed_HS
+= 60/90` — đều **đúng**, chỉ là kế thừa từ `Anycubic PLA @Anycubic Kobra X 0.4
+nozzle` chứ không phải override. Giá trị hiệu dụng khớp.
+
+---
+
+## 2026-08-26
+
+### P14 P12 — flow ratio và đồng bộ preset thứ 8
+
+Backup `user_backup-tune-set-20260826-211029`.
+
+| Preset | Key | Cũ | Mới |
+|---|---|---|---|
+| 2× filament | `filament_flow_ratio` | 0.98 | **1.0** |
+| `Novi 0.20 - FIGURE` | `ironing_flow` | 10% | **8%** |
+| | `ironing_inset` | 0 | **0.2** |
+| | `seam_slope_type` | external | **none** |
+| | `brim_type` | auto_brim | **brim_ears** |
+| | `initial_layer_speed` | 50 | **30** |
+| | `initial_layer_infill_speed` | 200 | **50** |
+| | `wall_loops` | 3 | **4** |
+
+🟢 Năm preset process giờ đồng bộ với nhau về bộ sửa bám bàn và ironing.
+
+🟡 `filament_flow_ratio = 1.0` là bước đoán +2% từ mức "hơi thiếu" Viet báo. Số
+đo thật lấy bằng hộp một tường: `flow_ratio_mới = 0.98 × (0.42 / bề_dày_đo)`.
+
+### Thêm bảng tổng quan vào `TODO.md` và `PENDING_APPLY.md`
+
+Hai file đã dài tới mức phải đọc hết mới biết còn gì treo. Thêm bảng ở đầu, có
+anchor link xuống từng mục.
+
+`PENDING_APPLY.md` giờ chỉ còn P6, và đổi từ 📝 sang ⏳ — hoãn có chủ đích, không
+phải chưa xét tới. `TODO.md` thêm mục C1: nghiệm thu bộ sửa tơ đang chờ một bản
+in, và chính nó là thứ chặn P6.
+
+### Chốt ba câu hỏi treo: A1, A2, B1
+
+**B1 — giữ `Novi 0.20 - FIGURE @AC KX` nguyên cha `0.16mm High Quality`.** Lệch
+quy ước nhưng chạy được. P13 (dựng lại preset) bỏ khỏi bucket.
+
+**A1 — tường hơi thiếu nhựa.** 🔵 Nhưng thủ phạm **không phải** trần flow:
+`filament_max_volumetric_speed` chỉ hạ *tốc độ* khi
+`speed × layer_height × line_width` vượt trần, lượng nhựa trên mỗi mm đường đi
+không đổi. Chạm trần thì in chậm hơn, không mỏng hơn. Nên 13 giữ nguyên và câu
+hỏi "13 có đủ không" thực ra đặt sai — đã đủ, vì nó không phải thứ gây thiếu.
+
+Thủ phạm là `filament_flow_ratio = 0.98`. Đề xuất P14 nâng lên 1.0, kèm cách đo
+thật bằng hộp một tường thay vì đoán.
+
+**A2 — khi preset trong slicer khác `presets/` trong git thì slicer thắng.** Ghi
+thành quy tắc thường trực ở `docs/working-rules.md` mục 6. Lý do: không phân biệt
+được "cloud sync ghi đè" với "Viet vừa đổi ý" chỉ bằng cách nhìn file. Đoán sai
+theo hướng khôi phục thì xoá mất việc Viet vừa làm; đoán sai theo hướng giữ thì
+chỉ mất một bản sửa đã có trong `CHANGELOG.md` và áp lại được.
+
+A2 cũ (điều tra vụ revert) đóng lại. A2 mới là hiệu chuẩn Pressure Advance — số
+`0.036` chưa bao giờ được đo, và nó chi phối trực tiếp cục nhựa ở seam.
+
+### P8 P9 P10 P11 — bộ sửa tơ và seam
+
+Backup `user_backup-tune-set-20260826-205206`.
+
+| Preset | Key | Cũ | Mới |
+|---|---|---|---|
+| machine | `retraction_speed` | 35 | **45** |
+| machine | `retract_before_wipe` | 70% | **100%** |
+| machine | `z_hop_types` | Slope Lift | **Normal Lift** |
+| 2× FIGURE | `ironing_flow` | 10% | **8%** |
+| 2× FIGURE | `ironing_inset` | 0 | **0.2** |
+| 2× FIGURE | `seam_slope_type` | external | **none** |
+
+**P11 đảo ngược P7.** P7 (25/08) làm scarf chạy mạnh hơn; P11 tắt scarf hẳn. Bằng
+chứng là bản in đẹp ở slot 3 — nó không có scarf. Ba khoá P7 ghi hôm qua
+(`seam_slope_conditional`, `seam_slope_min_length`, `scarf_joint_flow_ratio`) giờ
+thành khoá chết, giữ lại phòng khi bật scarf lại.
+
+🟡 P11 vốn đánh dấu ⏳ chờ in thử P7. Viet gọi tên nó tức là gỡ chặn — nên P7
+chưa bao giờ được in thử, và sẽ không bao giờ. Chấp nhận: bằng chứng từ TOOL 0.20
+đủ mạnh hơn một lần thử.
+
+🟡 Bốn thay đổi cùng lúc, ba trong số đó (P8, P9, P10) đều nhắm vào tơ. Bản in
+tới cho biết tơ hết hay không, **không** cho biết cái nào có công. P6 giữ lại
+trong bucket vì lý do đó.
+
+### Phát hiện preset thứ 8: `Novi 0.20 - FIGURE @AC KX`
+
+Audit đếm 8 user preset thay vì 7. Viet tạo preset này trong slicer ngày 25/08
+lúc 23:26; tôi không biết nên **mọi bản sửa từ đó tới nay không chạm vào nó**.
+
+🔴 Nó thiếu cả bộ sửa bám bàn — `brim_type` vẫn auto_brim, `initial_layer_speed`
+vẫn 50, `initial_layer_infill_speed` để 200. Đây đúng là cấu hình đã gây bong
+bàn. In bằng preset này là quay lại rủi ro cũ. Đề xuất P12.
+
+🟡 `inherits = 0.16mm High Quality` nhưng `layer_height = 0.2` — lệch quy ước
+"kế thừa preset hãng đúng layer height". Ghi thành B1 trong `TODO.md`.
+
+🔵 Bài học quy trình: `--audit` đếm số preset, và con số đó đổi là tín hiệu. Nếu
+không để ý dòng "8 user presets" thì preset này còn trôi thêm nhiều ngày nữa.
+
+### Slot 4 thay nhựa: Generic PLA màu matcha
+
+Cuộn cũ là Bambu Lab PLA Lite Cyan, mở 13/08. Cập nhật `profiles/filament.md`.
+
+⏳ Hex để trống, không bịa. `.conf` của máy này chỉ nhớ trạng thái một màu
+(`#00FFFF` cũ); màu 4 slot nằm trong project `.3mf`. Viet đặt màu trong UI thì
+slicer tự tính lại flush.
+
+### Bản in đẹp ở slot 3 — dữ liệu đối chứng tốt nhất tới giờ
+
+`Novi 0.20 - TOOL @AC KX`, slot 3, kết quả rất đẹp. Cùng cuộn
+`PLA BBL Lite@KX 0.4`, cùng machine preset, cùng retraction như bản FIGURE bị tơ
+và seam dư nhựa. **Khác mỗi process preset** — nên diff hai preset khoanh được
+vùng nghi vấn.
+
+Hai tính năng chỉ FIGURE mới có, rơi đúng vào hai lỗi còn lại:
+
+| | TOOL 0.20 *(đẹp)* | FIGURE 0.16 *(lỗi)* |
+|---|---|---|
+| `ironing_type` | no ironing | **top** |
+| `seam_slope_type` | none | **external** |
+| `outer_wall_speed` | 120 | 50 |
+
+🔴 **Lỗi của tôi tìm ra nhờ đó:** hạ `ironing_spacing` 0.15 → 0.1 mà không hạ
+`ironing_flow`. Số đường miết tăng 1,5 lần, mỗi đường vẫn 10% flow — tổng nhựa
+rải lên mặt trên tăng ~50%. Cộng `ironing_inset = 0` (miết sát mép, đẩy nhựa
+tràn qua tường ngoài). Đề xuất P10.
+
+🟡 **P7 có thể đi sai hướng.** Tôi giả định thêm scarf thì seam đẹp hơn; bản in
+đẹp lại **không có scarf**. Scarf tăng giảm flow dọc đoạn nối, mà
+`pressure_advance = 0.036` là số đoán, chưa hiệu chuẩn — nên scarf có thể đang
+gây cục nhựa chứ không sửa. Ghi thành P11 nhưng **chặn lại**: P7 chưa in thử lần
+nào, test P7 trước rồi mới quyết.
+
+🔵 **Giả thuyết ẩm yếu đi nhiều.** Slot 3 cùng cuộn, cùng ngày mở túi 13/08 với
+slot 1. Nhựa ẩm không chừa slot nào. Sấy lò không còn là việc nên làm trước.
+Chưa loại hẳn — khác màu và khác layer height.
+
+---
+
 ## 2026-08-25
+
+### P7 — cho scarf joint chạy thật trên hai preset FIGURE
+
+Backup `user_backup-tune-set-20260825-221044`.
+
+`seam_slope_type = external` trông như đã bật từ lâu, nhưng hai khoá khác vô hiệu
+hoá nó trên phần lớn đường viền. Cùng loại lỗi với `small_perimeter_threshold = 0`:
+cài đặt có, tác dụng không.
+
+| Key | Cũ | Mới | Vì sao |
+|---|---|---|---|
+| `seam_slope_conditional` | 1 | **0** | 1 = chỉ áp scarf khi điều kiện góc thoả, nhiều seam bị bỏ qua |
+| `seam_slope_min_length` | 10 | **5** | đường viền ngắn hơn ngưỡng không có scarf. Figure chi tiết nhỏ thì đa số dưới 10 mm |
+| `scarf_joint_flow_ratio` | 1 | **0.95** | bớt nhựa ở đoạn chồng của scarf |
+
+🟡 Chỉ ghi vào `Novi 0.12 - FIGURE` và `Novi 0.16 - FIGURE`. TOOL và TEST có
+`seam_slope_type = none` — scarf tắt hẳn, ba khoá trên là khoá chết ở đó. Bucket
+ghi "cả 4 process" là sai, đã thu hẹp phạm vi.
+
+🔵 Đánh đổi: scarf trên góc nhọn có thể làm cạnh hơi tròn. Thấy cạnh mất sắc thì
+trả `seam_slope_conditional` về 1.
 
 ### B1 chốt: lớp đầu `Novi 0.12 - FIGURE` giữ 0.2
 
