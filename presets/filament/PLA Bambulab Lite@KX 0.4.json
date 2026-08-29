@@ -6,13 +6,13 @@
         "1.3"
     ],
     "filament_flow_ratio": [
-        "1.0"
+        "1"
     ],
     "filament_retraction_length": [
         "nil"
     ],
     "filament_settings_id": [
-        "PLA BBL Lite@KX 0.4"
+        "PLA Bambulab Lite@KX 0.4"
     ],
     "filament_vendor": [
         "BambuLab"
@@ -26,7 +26,7 @@
     ],
     "inherits": "Anycubic PLA @Anycubic Kobra X 0.4 nozzle",
     "is_custom_defined": "0",
-    "name": "PLA BBL Lite@KX 0.4",
+    "name": "PLA Bambulab Lite@KX 0.4",
     "nozzle_temperature_HS": [
         "205"
     ],
