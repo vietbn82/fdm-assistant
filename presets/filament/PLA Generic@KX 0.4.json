@@ -19,7 +19,7 @@
     "is_custom_defined": "0",
     "name": "PLA Generic@KX 0.4",
     "nozzle_temperature_HS": [
-        "205"
+        "200"
     ],
     "nozzle_temperature_initial_layer_HS": [
         "210"
