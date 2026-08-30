@@ -5,7 +5,7 @@
     "from": "User",
     "inherits": "Anycubic Kobra X 0.4 nozzle",
     "is_custom_defined": "0",
-    "machine_end_gcode": "M400\nG91\nG1 E-2 F1800 ; P25 rut mot phan truoc, giu it ap luc de wipe khong ray nhua\nG1 X3 Y3 F3000 ; P25 wipe - keo giot nhua khoi mui in\nG1 E-4 F1800 ; P25 rut not phan con lai\nG1 Z5 F600 ; P16 nhac dau in khoi mat in\nG90\nM140 S0 ; turn off heatbed\nM104 S0 ; turn off temperature\nM107;turn off fan\nM84; disable motors\n; disable stepper motors",
+    "machine_end_gcode": "M400\nG91\nG1 E-6 F1800 ; P25v2 rut du truoc khi wipe, khop retract_before_wipe=100%\nG1 X3 Y3 F3000 ; P25v2 wipe - keo giot nhua khoi mui in\nG1 Z5 F600 ; P16 nhac dau in khoi mat in\nG90\nM140 S0 ; turn off heatbed\nM104 S0 ; turn off temperature\nM107;turn off fan\nM84; disable motors\n; disable stepper motors",
     "name": "Anycubic Kobra X 0.4 nozzle - high quality",
     "printer_settings_id": "Anycubic Kobra X 0.4 nozzle - high quality",
     "retract_before_wipe": [
