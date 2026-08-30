@@ -30,6 +30,9 @@
     "overhang_fan_threshold": [
         "25%"
     ],
+    "pressure_advance": [
+        "0.32"
+    ],
     "textured_plate_temp": [
         "50"
     ],
