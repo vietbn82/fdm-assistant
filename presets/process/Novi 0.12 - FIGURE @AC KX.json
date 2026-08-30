@@ -14,6 +14,7 @@
     "seam_gap": "15%",
     "seam_slope_conditional": "0",
     "seam_slope_min_length": "5",
+    "seam_slope_type": "external",
     "slowdown_for_curled_perimeters": "1",
     "small_perimeter_threshold": "20",
     "sparse_infill_density": "18%",
