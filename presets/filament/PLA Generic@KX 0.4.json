@@ -1,13 +1,11 @@
 {
-    "filament_flow_ratio": [
-        "1"
-    ],
     "filament_retraction_length": [
         "nil"
     ],
     "filament_settings_id": [
         "PLA Generic@KX 0.4"
     ],
+    "filament_timestamp": "2026-09-03 21:50:07",
     "filament_vendor": [
         "Generic"
     ],
@@ -26,9 +24,6 @@
     ],
     "nozzle_temperature_range_high": [
         "220"
-    ],
-    "overhang_fan_threshold": [
-        "25%"
     ],
     "textured_plate_temp": [
         "50"
