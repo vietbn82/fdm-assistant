@@ -2,7 +2,14 @@
 
 Năm profile theo mục đích in. Tầng nào sở hữu gì: `docs/preset-model.md` mục 3.
 
-Quy tắc đặt tên: `Novi {layer height} - {FIGURE|TOOL|TEST} @AC KX`
+🟢 **Đọc từ đĩa 2026-09-03 22:0x, sau khi Viet dựng lại toàn bộ preset trên
+slicer 2.0.0.2.** Bộ trên máy là chuẩn. Bộ cũ (`Novi … @AC KX`) không còn tồn
+tại — mọi override cũ không nêu ở đây đều đã **bị bỏ**, giá trị hiệu dụng giờ
+lấy từ preset hãng.
+
+Tên: `{layer height} {Figure|FIGURE|TOOL|TEST} @AC KX`.
+🟡 Chữ hoa/thường không nhất quán (`0.12 Figure` vs `0.16 FIGURE`) — chỉ là tên
+hiển thị, không ảnh hưởng gì, nhưng grep phải để ý.
 
 ---
 
@@ -10,168 +17,134 @@ Quy tắc đặt tên: `Novi {layer height} - {FIGURE|TOOL|TEST} @AC KX`
 
 | Preset | Kế thừa | Mục đích |
 |---|---|---|
-| `Novi 0.12 - FIGURE @AC KX` | `0.12mm High Quality @Kobra X` | sắc nét nhất, model nhỏ |
-| `Novi 0.16 - FIGURE @AC KX` | `0.16mm High Quality @Kobra X` | model lớn hơn, vẫn cần sắc nét nhưng 0.12 quá lâu |
-| `Novi 0.20 - FIGURE @AC KX` | 🟡 `0.16mm High Quality @Kobra X` | Viet tạo 25/08, `layer_height = 0.2` — cha lệch, xem B1 |
-| `Novi 0.20 - TOOL @AC KX` | `0.20mm Standard @Kobra X` | chắc, đủ nhanh |
-| `Novi 0.28 - TEST @AC KX` | `0.28mm Standard @Kobra X` | nhanh nhất, bỏ mọi thứ thừa |
+| `0.12 Figure @AC KX` | `0.12mm High Quality @Kobra X` | sắc nét nhất, model nhỏ |
+| `0.16 FIGURE @AC KX` | `0.16mm High Quality @Kobra X` | model lớn hơn, vẫn cần sắc nét |
+| `0.20 Figure @AC KX` | 🟢 `0.20mm High Quality @Kobra X` | figure nhanh hơn |
+| `0.20 TOOL @AC KX` | `0.20mm Standard @Kobra X` | chắc, đủ nhanh |
+| `0.28 TEST @AC KX` | `0.28mm Standard @Kobra X` | nhanh nhất |
 
-Mỗi profile kế thừa preset hãng **đúng layer height của nó**, nên chỉ phải ghi
-đè vài key. Không cái nào chép lại giá trị đã đúng sẵn ở cha.
+🟢 **B1 (cha lệch) đã hết.** `0.20 Figure` giờ kế thừa đúng `0.20mm High Quality`
+và **không còn** override `layer_height` tay — cấu trúc đúng, không phải chạy
+được nhờ vá.
 
-🟡 Trừ `Novi 0.20 - FIGURE` — xem B1 trong `TODO.md`. Nó cũng chưa có bộ sửa bám
-bàn mà bốn preset kia đã có; đề xuất P12.
-
-🔵 Tốc độ **không** bị hạ xuống cho khớp trần flow của nhựa. Đó là việc của
-filament preset, slicer tự làm lúc slice — xem `docs/preset-model.md` mục 3.
+🔵 Preset user giờ rất mỏng: 11–15 khoá cho FIGURE, 7 cho TOOL, 6 cho TEST.
+Càng mỏng càng dễ theo kịp khi hãng cập nhật profile gốc.
 
 ---
 
-## Áp cho cả bốn profile
+## FIGURE — ba bản dùng chung một bộ override
+
+`0.12 Figure`, `0.16 FIGURE`, `0.20 Figure` **giống hệt nhau** về override, trừ
+hai khoá lớp đầu chỉ có ở 0.20:
 
 | Key | Cha | Đặt | Vì sao |
 |---|---|---|---|
-| `small_perimeter_threshold` | 0 | **20** | ngưỡng 0 mm khiến `small_perimeter_speed = 50%` **không bao giờ chạy** — không đoạn nào đủ điều kiện "chu vi nhỏ". 20 mm chu vi ≈ đường kính 6,4 mm |
-| `wipe_before_external_loop` | 0 | **1** | lau trước khi vào tường ngoài, giấu điểm bắt đầu |
 | `seam_gap` | 10% | **15%** | chừa hở nhiều hơn ở điểm khép vòng, bớt cục nhựa |
-| `skirt_loops` | 0 | **2** | mồi nhựa trước khi vào vật — vị trí in đầu tiên hay thiếu nhựa. 🔵 **Trừ `Novi 0.16 - FIGURE`** — Viet cố ý bỏ, giữ 0 |
+| `wipe_before_external_loop` | 0 | **1** | lau trước khi vào tường ngoài, giấu điểm bắt đầu |
 | `wipe_on_loops` | 0 | **1** | |
-
-🔵 `small_perimeter_threshold` đo theo **chu vi**, không phải bán kính. Lỗ và trụ
-nhỏ hơn ngưỡng in ở 50% tốc độ tường ngoài — đầu đùn kịp bơm trong đoạn ngắn.
-
----
-
-### Scarf joint — 🔴 đã tắt trên FIGURE (áp lại 29/08)
-
-`seam_slope_type = none` ở cả hai preset FIGURE.
-
-🟡 P11 đặt `none` ngày 26/08, bị revert về `external` ngày 27/08, **áp lại bằng
-P15 ngày 29/08**. Bản in 29/08 chạy có scarf nên không nghiệm thu được gì. Bản in đẹp nhất tới nay
-(`Novi 0.20 - TOOL`, slot 3, 26/08) **không có scarf**; bản bị cục nhựa ở seam
-thì có. Scarf tăng giảm flow dọc đoạn nối, mà `pressure_advance = 0.036` chưa
-hiệu chuẩn — nhiều khả năng scarf đang gây cục nhựa chứ không sửa.
-
-Ba khoá dưới ghi hôm 25/08 giờ là **khoá chết**, giữ lại phòng khi bật scarf lại:
-
-| Key | Cha | Đặt | Vì sao |
-|---|---|---|---|
-| `seam_slope_conditional` | 1 | **0** | 1 = chỉ áp scarf khi điều kiện góc thoả, phần lớn seam bị bỏ qua |
-| `seam_slope_min_length` | 10 | **5** | đường viền ngắn hơn ngưỡng không có scarf; figure chi tiết nhỏ thì đa số dưới 10 mm |
+| `slowdown_for_curled_perimeters` | 0 | **1** | chậm lại ở mép bị cong vênh |
+| `reduce_crossing_wall` | 0 | **1** | travel không cắt ngang qua vật |
+| `max_travel_detour_distance` | 0 | **40** | trần cho đường vòng của khoá trên |
+| `prime_tower_width` | 30–35 | **10** | tháp mồi hẹp, bớt rác |
+| `seam_slope_type` | none | **external** | scarf joint ở tường ngoài |
+| `seam_slope_conditional` | 1 | **0** | 1 = phần lớn seam bị bỏ qua |
+| `seam_slope_min_length` | 10 | **5** | figure chi tiết nhỏ, đa số viền dưới 10 mm |
 | `scarf_joint_flow_ratio` | 1 | **0.95** | bớt nhựa ở đoạn chồng của scarf |
+| `initial_layer_speed` | 50 | **30** *(chỉ 0.20)* | chậm hơn = bám bàn tốt hơn |
+| `initial_layer_infill_speed` | 100 | **50** *(chỉ 0.20)* | |
 
-🔵 TOOL và TEST để `seam_slope_type = none` — scarf tắt hẳn, ba khoá trên là khoá
-chết ở đó nên không ghi.
+🟡 **Lớp đầu của 0.12 và 0.16 giờ chạy tốc độ hãng (50 / 50 và 50 / 100).** Bộ cũ
+hạ xuống 30 cho cả ba để bám bàn. Chỉ 0.20 còn giữ. Nếu lớp đầu bong góc trên
+0.12/0.16 thì đây là chỗ nhìn trước tiên.
 
-🟡 Scarf trên góc nhọn có thể làm cạnh hơi tròn. Thấy cạnh mất sắc thì trả
-`seam_slope_conditional` về 1.
+### Giá trị hiệu dụng, ba bản FIGURE
 
----
+| Key | 0.12 | 0.16 | 0.20 |
+|---|---|---|---|
+| `layer_height` / `initial_layer_print_height` | 0.12 / 0.2 | 0.16 / 0.2 | 0.2 / 0.2 |
+| `outer_wall_speed` / `inner_wall_speed` | 60 / 150 | 60 / 150 | 60 / 150 |
+| `top_surface_speed` | 150 | 150 | 150 |
+| `initial_layer_speed` / `_infill_speed` | 50 / 50 | 50 / 100 | **30 / 50** |
+| `wall_loops` | 2 | 2 | 2 |
+| `top` / `bottom_shell_layers` | 5 / 5 | **6** / 4 | 5 / 3 |
+| `sparse_infill_density` / `pattern` | 15% / **3dhoneycomb** | 15% / gyroid | 15% / gyroid |
+| `brim_type` / `ironing_type` | auto_brim / no ironing | auto_brim / no ironing | auto_brim / no ironing |
+| `detect_thin_wall` | 0 | 0 | 0 |
+| `small_perimeter_threshold` | 0 | 0 | 0 |
+| `skirt_loops` | 0 | 0 | 0 |
 
-## FIGURE — ưu tiên sắc nét
+Tất cả cột trên là **kế thừa từ hãng**, không phải override — ba bản khác nhau
+chỉ vì cha khác nhau.
 
-Hai bản, cùng ý đồ, khác layer height. Chọn 0.12 cho model nhỏ nhiều chi tiết,
-0.16 khi model lớn và 0.12 mất quá nhiều thời gian.
+🟡 Ba khác biệt còn sót giữa ba bản, đều do cha, đều **không cố ý**:
 
-Đánh đổi: chậm, lấy cạnh sắc và mặt trên liền.
+| | Lệch | Hệ quả |
+|---|---|---|
+| `0.12` dùng `3dhoneycomb`, hai bản kia `gyroid` | cha 0.12 HQ đặt vậy | infill 0.12 không đẳng hướng như hai bản kia |
+| `0.16` có `top_shell_layers = 6`, hai bản kia 5 | cha 0.16 HQ đặt vậy | 0.16 dày mặt trên hơn, in lâu hơn chút |
+| `bottom_shell_layers` 5 / 4 / 3 | cha | mặt đáy 0.20 mỏng nhất (3 × 0.2 = 0.6 mm) |
 
-### FIGURE 0.12 — cha `0.12mm High Quality @Kobra X`
+📝 Muốn ba bản khớp nhau thì phải pin lại — nhưng đó là thêm override vào preset
+vừa mới được dọn sạch. Chờ Viet chốt (B3 trong `TODO.md`).
+
+### Những gì bộ cũ có mà bộ mới bỏ
+
+| Key | Bộ cũ | Giờ | Rủi ro |
+|---|---|---|---|
+| `outer_wall_speed` | 50 | **60** *(cha)* | 🔵 nhanh hơn 20%, có thể lộ rung ở cạnh |
+| `top_surface_speed` | 80 *(P21)* | **150** *(cha)* | 🟡 P21 sinh ra vì mặt trên xấu ở 150 — theo dõi lại |
+| `initial_layer_speed` | 30 | **50** *(0.12, 0.16)* | 🟡 bám bàn, xem trên |
+| `initial_layer_infill_speed` | 50 *(0.16)* | **100** *(cha)* | 🟡 infill lớp đầu nhanh gấp đôi |
+| `detect_thin_wall` | 1 *(0.12, 0.16)* | **0** *(cha)* | 🔵 chi tiết mảnh có thể bị bỏ |
+| `small_perimeter_threshold` | 20 | **0** *(cha)* | 🔵 `small_perimeter_speed` không bao giờ kích hoạt |
+| `skirt_loops` | 0 *(cha, không đổi)* | **0** | ⚪ FIGURE chưa bao giờ đè khoá này — chỉ TOOL/TEST từng đặt 2 |
+| `ironing_*` | 0.2 / 0.1 / 20 | *(cha)* | ⚪ vốn là khoá chết, `ironing_type = no ironing` |
+| `layer_height` pin trên 0.20 | 0.2 | *(cha 0.20 HQ)* | 🟢 hết vá |
+
+## TOOL 0.20 — override còn lại rất mỏng
 
 | Key | Cha | Đặt | Vì sao |
 |---|---|---|---|
-| `outer_wall_speed` | 60 | **50** | tốc độ tường ngoài quyết định độ sắc |
-| `sparse_infill_density` | 15% | **18%** | |
-| `sparse_infill_pattern` | 3dhoneycomb | **gyroid** | |
-| `ironing_type` | no ironing | **top** | mặt trên phẳng |
-| `seam_slope_type` | none | **external** | scarf joint, giấu đường seam |
-| `detect_thin_wall` | 0 | **1** | giữ chi tiết mảnh |
-| `slowdown_for_curled_perimeters` | 0 | **1** | |
-| `brim_type` | auto_brim | **brim_ears** | brim chỉ ở góc/mũi nhọn — bám chỗ cần, gỡ dễ |
-| `initial_layer_speed` | 50 | **30** | chậm hơn = nhựa có thời gian dính bàn |
-| `initial_layer_infill_speed` | 100 | **50** | |
-| `wall_loops` | 2 | **4** | thêm độ bền |
-
-Năm dòng cuối chép từ bản 0.16 sau khi Viet chỉnh và bản in hết bong bàn.
-
-🟡 `initial_layer_print_height` **giữ 0.2**, không chép 0.16 sang. Lớp đầu dày
-hơn layer height cho dung sai bám bàn tốt hơn — hạ xuống đi ngược mục đích đang
-sửa. Chờ Viet chốt.
-
-Kế thừa sẵn: `wall_sequence = inner wall/outer wall` (outer in sau cùng — bề mặt
-đẹp nhất), `outer_wall_acceleration = 2000`, `seam_position = aligned`,
-`ironing_speed = 15`, `ironing_spacing = 0.1`, top/bottom shell 5/5.
-
-🟢 Ở layer 0.12, trần flow không phải giới hạn (~297 mm/s). Chất lượng mới là
-thứ quyết định tốc độ, nên giá trị của hãng dùng được nguyên.
-
-### FIGURE 0.16 — cha `0.16mm High Quality @Kobra X`
-
-| Key | Cha | Đặt | Vì sao |
-|---|---|---|---|
-| `outer_wall_speed` | 60 | **50** | như trên |
-| `ironing_type` | no ironing | **top** | |
-| `ironing_speed` | 30 | **20** | 30 là bào chứ không phải miết |
-| `ironing_spacing` | 0.15 | **0.1** | |
-| `seam_slope_type` | none | **external** | |
-| `detect_thin_wall` | 0 | **1** | |
-| `slowdown_for_curled_perimeters` | 0 | **1** | |
-
-Viet tự chỉnh trong slicer ngày 25/08, sau bản in hết bong bàn:
-
-| Key | Cha | Đặt | Vì sao |
-|---|---|---|---|
-| `brim_type` | auto_brim | **brim_ears** | brim chỉ ở góc/mũi nhọn — bám chỗ cần, gỡ dễ |
-| `initial_layer_speed` | 50 | **30** | chậm hơn = nhựa có thời gian dính bàn |
-| `initial_layer_infill_speed` | 100 | **50** | |
-| `initial_layer_print_height` | 0.2 | **0.16** | |
-| `wall_loops` | 3 | **4** | thêm độ bền |
-
-🔵 `sparse_infill_density` giữ 15% — trùng giá trị cha nên slicer không lưu
-override. Trước đó đặt 18%, đã bỏ.
-
-Kế thừa sẵn: `wall_sequence`, `outer_wall_acceleration = 2000`, `seam_position =
-aligned`, `wall_loops = 2`, top/bottom shell **6/4**.
-
-🟢 Bớt được một override so với bản 0.12: cha của 0.16 đã dùng `gyroid` sẵn.
-Ngược lại phải đè `ironing_speed` và `ironing_spacing` vì cha đặt 30 / 0.15,
-trong khi cha của 0.12 đã đặt sẵn 15 / 0.1.
-
-🔵 Flow vẫn chưa chạm trần: nhanh nhất 200 mm/s → 14,4 mm³/s ở layer 0.16, dưới
-15. Với slot 2 (Generic, trần 13) thì phần internal solid bị hạ nhẹ.
-
-## TOOL 0.20 — ưu tiên chắc + nhanh
-
-Đánh đổi: bỏ hoàn thiện bề mặt, lấy độ bền.
-
-| Key | Cha | Đặt | Vì sao |
-|---|---|---|---|
-| `wall_loops` | 2 | **4** | 🔵 độ bền đến từ tường, rẻ hơn nhiều so với tăng infill |
-| `wall_sequence` | inner wall/outer wall | **inner-outer-inner wall** | liên kết tường tốt nhất |
-| `sparse_infill_density` | 15% | **25%** | trên 30% gần như không thêm độ bền |
 | `sparse_infill_pattern` | grid | **gyroid** | đẳng hướng, chịu lực mọi chiều |
-| `bottom_shell_layers` | 3 | **4** | |
-| `outer_wall_speed` | 200 | **120** | 200 mm/s quá nhanh cho dung sai trên máy i3 |
+| `small_perimeter_threshold` | 0 | **20** | ngưỡng 0 mm khiến `small_perimeter_speed` không bao giờ chạy |
+| `seam_gap` | 10% | **15%** | |
+| `wipe_before_external_loop` / `wipe_on_loops` | 0 / 0 | **1 / 1** | |
+| `slowdown_for_curled_perimeters` | 0 | **1** | |
+| `overhang_2_4_speed` | 30 | **30** | ⚪ trùng giá trị cha — pin thừa, vô hại |
 
-Kế thừa sẵn: `ironing_type = no ironing`, `enable_support = 0`,
-`ensure_vertical_shell_thickness = ensure_all`, `top_shell_layers = 5`.
+Hiệu dụng: `wall_loops = 2`, `wall_sequence = inner wall/outer wall`,
+`sparse_infill_density = 15%`, `bottom_shell_layers = 3`, `top_shell_layers = 5`,
+`outer_wall_speed = 200`, `inner_wall_speed = 300`.
 
-🟢 `enable_support` để ở 0 và **không đè**. Support là thuộc tính từng model,
-bật trong profile nghĩa là mọi bản in đều sinh support.
+🔴 **Bộ cũ đặt độ bền, bộ mới thì không.** `wall_loops` 4 → 2,
+`wall_sequence = inner-outer-inner` → mặc định, `sparse_infill_density` 25% → 15%,
+`bottom_shell_layers` 4 → 3. Preset TOOL giờ gần như bằng `0.20mm Standard` của
+hãng, chỉ khác infill pattern và mấy khoá seam. Đồ dùng chịu lực in bằng preset
+này sẽ **yếu hơn hẳn** so với trước 03/09.
+
+🟡 `outer_wall_speed` 120 → **200**. Bộ cũ hạ xuống 120 vì 200 mm/s quá nhanh cho
+dung sai máy i3. Thực tế trần flow hạ nó xuống ~154 mm/s (xem dưới) nhưng vẫn
+nhanh hơn 120 rõ rệt.
 
 ## TEST 0.28 — chỉ nhanh
 
-Đánh đổi: bỏ mọi thứ không phải cái đang cần kiểm tra.
+| Key | Cha | Đặt |
+|---|---|---|
+| `sparse_infill_density` | 15% | **10%** |
+| `sparse_infill_pattern` | grid | **3dhoneycomb** |
+| `top_shell_layers` | 3 | **2** |
+| `bottom_shell_layers` | 3 | **2** |
+| `flush_into_objects` / `flush_into_infill` | 0 / 0 | **1 / 1** |
 
-| Key | Cha | Đặt | Vì sao |
-|---|---|---|---|
-| `sparse_infill_density` | 15% | **5%** | |
-| `sparse_infill_pattern` | grid | **lightning** | chỉ đỡ mặt trên, nhanh hơn hẳn grid |
-| `top_shell_layers` | 3 | **2** | |
-| `bottom_shell_layers` | 3 | **2** | |
-| `brim_type` | auto_brim | **no_brim** | bật lại thủ công khi model chân nhỏ |
+🟡 `--audit`: top shell 2 × 0.28 = 0.56 mm < 0.6 mm — mặt trên có thể hơi rỗ.
+Chấp nhận được với bản thử, đó là chỗ đổi lấy tốc độ.
 
-🟡 Top shell 2 × 0.28 = 0.56 mm, dưới ngưỡng 0.6 mm nên mặt trên có thể hơi
-rỗ. Chấp nhận được với bản thử — đó chính là chỗ đổi lấy tốc độ.
+🟢 **Không cần đổi Printer preset nữa khi in 0.28.** Bộ cũ bắt chuyển sang bản
+`- TEST` vì `z_hop = 0.2` không vượt nổi lớp 0.28; giờ `z_hop` để nguyên 0.4 của
+hãng ở cả hai machine preset.
+
+🔵 Bỏ so với bộ cũ: `brim_type = no_brim` (giờ `auto_brim`), `skirt_loops = 2`,
+`seam_gap`, `small_perimeter_threshold`, `wipe_*`, `slowdown_for_curled_perimeters`.
 
 📝 Khi test một thứ cụ thể — dung sai lỗ, khớp nối, overhang — chỉ nâng chất
 lượng đúng vùng đó bằng **height range modifier** hoặc **object setting
@@ -181,48 +154,57 @@ override**, đừng đổi cả profile.
 
 ## Trần flow quyết định tốc độ, không phải layer height
 
-Với `filament_max_volumetric_speed` = 15 mm³/s *(hiện đang để 13 — bảng dưới
-giữ 15 để so sánh, tốc độ thực tế thấp hơn ~13%)*:
+`filament_max_volumetric_speed = 13` mm³/s trên cả hai filament preset. Số dưới
+đọc từ `--audit --flow`, tức tốc độ **thật** sau khi slicer hạ xuống:
 
-| layer | line width | tốc độ tối đa thực tế |
-|---|---|---|
-| 0.12 | 0.42 | ~297 mm/s — flow không phải giới hạn |
-| 0.16 | 0.45 | ~208 mm/s — vẫn chưa chạm |
-| 0.20 | 0.45 | ~166 mm/s |
-| 0.28 | 0.45 | ~119 mm/s |
+| Preset | Khoá bị hạ | Đặt | Thật |
+|---|---|---|---|
+| `0.12 Figure` | — | | 🟢 không khoá nào chạm trần |
+| `0.16 FIGURE` | `sparse_infill_speed` | 200 | 180 |
+| | `internal_solid_infill_speed` | 200 | 193 |
+| | `gap_infill_speed` | 250 | 180 |
+| `0.20 Figure` | `inner_wall_speed` | 150 | 144 |
+| | `sparse_infill_speed` | 200 | 144 |
+| | `internal_solid_infill_speed` | 200 | 154 |
+| `0.20 TOOL` | `outer_wall_speed` | 200 | 154 |
+| | `inner_wall_speed` / `sparse_infill_speed` | 300 | 144 |
+| | `internal_solid_infill_speed` | 250 | 154 |
+| | `top_surface_speed` | 200 | 154 |
+| `0.28 TEST` | mọi tốc độ chính | 200 | 103–110 |
 
 🔵 **Trên trần flow, layer dày hơn không cho tốc độ cao hơn** — throughput đứng
 yên. Cái lợi duy nhất của layer dày là **ít lớp hơn**: bớt thời gian Z, bớt
-accel/decel, bớt đổi hướng. Vẫn đáng, nhưng không tuyến tính như thường nghĩ.
+accel/decel, bớt đổi hướng.
 
-Đó là lý do TEST ở 0.28 nhanh hơn TOOL ở 0.20, nhưng không nhanh gấp rưỡi.
+🔵 Tốc độ **không** bị hạ tay xuống cho khớp trần flow. Slicer tự làm lúc slice —
+xem `docs/preset-model.md` mục 3. Muốn nhanh hơn thật thì phải nâng trần flow ở
+tầng filament, và phải đo trước.
 
 ---
 
 ## In 4 màu
 
-Nhóm prime tower và flush nằm ở tầng process, nên chiến lược purge đổi theo mục đích:
-
-| | FIGURE | TOOL | TEST |
+| | FIGURE (cả ba) | TOOL | TEST |
 |---|---|---|---|
-| `flush_into_objects` | ❌ 0 | ✅ 1 | ✅ 1 |
-| `flush_into_infill` | ❌ 0 | ✅ 1 | ✅ 1 |
+| `flush_into_objects` | ❌ 0 | ❌ 0 | ✅ 1 |
+| `flush_into_infill` | ❌ 0 | ❌ 0 | ✅ 1 |
 | `flush_into_support` | 1 | 1 | 1 |
-| `enable_prime_tower` | 1 | 1 | chỉ khi cần |
-| flush tối↔sáng | cao, 450–650 mm³ | vừa, 300–400 | thấp, chấp nhận lem |
+| `enable_prime_tower` | 1 | 1 | 1 |
+| `prime_tower_width` | 10 | 30 | 30 |
 
-Với FIGURE, nhựa xả vào thân vật thể có thể lộ ra bề mặt hoặc lẫn màu ở lớp kế
-tiếp. Với TOOL và TEST thì nằm khuất bên trong — thu hồi được phần lớn nhựa
-purge, giảm rác đáng kể.
+🟡 **TOOL đã tắt thu hồi purge (đổi 03/09).** Bộ cũ bật `flush_into_objects` +
+`_infill` cho TOOL và TEST; giờ chỉ TEST. Với TOOL, toàn bộ nhựa purge thành rác
+trừ khi bản in có support. Bật lại nếu thấy tốn nhựa — nhựa thải nằm khuất bên
+trong đồ dùng, hiếm khi lộ.
 
-🟢 **Đã bật** cho TOOL và TEST ngày 2026-08-23. FIGURE giữ 0 như mặc định hãng.
+🟡 `purge_in_prime_tower` ở tầng machine giờ là **0** (kế thừa hãng) — xem cảnh
+báo trong `profiles/printer.md`. Hai khoá này khác nhau: `flush_into_*` quyết
+định *xả vào đâu*, `purge_in_prime_tower` quyết định *có xả vào tháp mồi không*.
 
-### Ma trận flush thật (đọc từ gcode, 2026-08-29)
+### Ma trận flush (đọc từ gcode 2026-08-29)
 
-🟢 Nguồn: gcode slicer sinh ra lúc 16:31 ngày 29/08 cho một mẫu 4 màu — chính là
-thứ máy sẽ chạy. Không phải `.conf`, `.conf` chỉ nhớ trạng thái một màu.
-
-Đơn vị mm³, đọc theo hàng: **từ** màu hàng **sang** màu cột.
+🔵 Nguồn: gcode slicer sinh ra lúc 16:31 ngày 29/08 cho một mẫu 4 màu. Đơn vị
+mm³, đọc theo hàng: **từ** màu hàng **sang** màu cột.
 
 | từ ↓ / sang → | Beige | White | Black | Matcha |
 |---|---|---|---|---|
@@ -234,23 +216,14 @@ thứ máy sẽ chạy. Không phải `.conf`, `.conf` chỉ nhớ trạng thái
 Tổng **3854 mm³** nếu chạy đủ 12 lần đổi màu ≈ 4,8 g PLA.
 
 🔴 **Hàng Black một mình chiếm 2205 mm³ — 57% toàn bộ.** Đổi *từ* đen sang bất kỳ
-màu nào cũng đắt; đổi *sang* đen thì rẻ nhất bảng (142–203). Quy luật cũ vẫn
-đúng, chỉ đổi vai: trước đây White là màu đắt nhất để chuyển sang, giờ cả Beige
-lẫn White đều sáng nên Black thành nút thắt.
+màu nào cũng đắt; đổi *sang* đen thì rẻ nhất bảng (142–203).
 
-📝 Sắp thứ tự in để **gom các đoạn màu đen lại**, tránh vào ra đen nhiều lần.
-Mỗi lần rời đen tốn 635–785 mm³.
+📝 Sắp thứ tự in để **gom các đoạn màu đen lại**. Mỗi lần rời đen tốn 635–785 mm³.
 
-🔴 **Với FIGURE, toàn bộ 3854 mm³ là rác.** `flush_into_objects = 0` và
-`flush_into_infill = 0`, chỉ còn `flush_into_support = 1` mà bản in không phải
-lúc nào cũng có support. Đây là cái giá của mặt ngoài sạch — xem bảng ở trên.
+🟡 **Bảng này chưa kiểm lại sau khi lên 2.0.0.2.** `.conf` của bản 2.0.0.2 không
+còn lưu `filament_colors` và bảng gán slot→preset (mục `presets` chỉ còn
+`filaments` và `machine`), nên không đọc lại được từ config — muốn số mới phải
+slice một mẫu 4 màu rồi đọc gcode. Xem `profiles/filament.md`.
 
 `printer_flush_multiplier = 0.7` ở machine preset là hệ số nhân chung — hạ xuống
 sẽ giảm cả 12 ô cùng lúc, nhưng chỉ nên làm sau khi thấy bản in thật không lem.
-
-🟢 Trước đây toàn bộ lượng purge thành rác vì chỉ `flush_into_support` bật, mà
-support không phải bản in nào cũng có. TOOL và TEST giờ thu hồi được phần lớn.
-
-🟡 `flush_into_objects` nhét nhựa thải vào **phần đặc** của vật thể, không chỉ
-infill. Với đồ dùng thì không thấy — nhưng nếu in đồ dùng cần mặt ngoài đẹp thì
-tắt lại cho riêng bản đó.

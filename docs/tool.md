@@ -41,6 +41,15 @@ Revert = xoá `user\`, đổi tên backup lại thành `user`.
 🟡 `FLOW` mặc định bị ẩn vì **preset hãng cũng vi phạm** (xem `docs/preset-model.md`
 mục 6). Nó là thông tin chẩn đoán, không phải lỗi của bạn.
 
+🟡 **Nếu thấy `WARN pressure_advance ... very high for direct drive`, đừng vội
+coi là lỗi.** Ngưỡng cảnh báo giả định hotend đơn màu thông thường
+(nozzle_volume ~15–20 mm³), còn đầu 4-in-1 của Kobra X dùng chung một buồng
+nóng chảy 79 mm³ cho cả bốn màu — PA thật của máy này nhiều khả năng cao hơn
+mức "bình thường" hẳn. Ngày 30/08 đo được 0.32 cho cả hai filament nhưng chưa
+kết luận chắc — phép đo dính sự cố nghẹt nozzle ngay sau đó, xem
+`profiles/filament.md` và `CHANGELOG.md` 30/08. Hiện `pressure_advance` đang để
+lại 0.036 (kế thừa) chờ đo lại.
+
 ## Kiểm tra những gì
 
 **process**

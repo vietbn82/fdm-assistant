@@ -6,7 +6,11 @@ Kho chứa mọi thay đổi preset đã đề xuất nhưng **chưa ghi vào m�
 
 | ID | Nhắm vào | Preset | Trạng thái |
 |---|---|---|---|
-| [P6](#p6) | tơ ở travel ngắn + không z-hop | machine | 📝 **đã gỡ chặn** |
+| P32 | `purge_in_prime_tower = 1` | `Kobra X 0.4 - MultiColor` | 📝 chờ duyệt |
+
+🔵 03/09: Viet dựng lại toàn bộ preset trên slicer 2.0.0.2, bộ trên máy là chuẩn.
+Ba điểm cần Viet chốt ý định (B2 flow_ratio, B3 FIGURE lệch nhau, B4 TOOL mất
+override độ bền) nằm ở `TODO.md` — chỉ khi chốt xong mới thành dòng ở đây.
 
 **Cách dùng:** đọc, rồi nói ID nào được duyệt — `"apply P1 P4"`. Claude lấy đúng
 những dòng đó, chạy lệnh ghi kèm backup, rồi ghi kết quả sang `CHANGELOG.md`.
@@ -18,38 +22,34 @@ những dòng đó, chạy lệnh ghi kèm backup, rồi ghi kết quả sang `C
 
 Trạng thái: 📝 chờ duyệt / ⏳ chờ điều kiện khác / 🔴 chặn kỹ thuật
 
-🟢 P15–P21 đã xong ngày 29/08 — chi tiết trong `CHANGELOG.md`.
+🟢 P15–P21 (29/08); P6, P25, P25-v2, P27 (0.36→0.32), P28, P29, P30, P26
+(30/08) đã xong — chi tiết trong `CHANGELOG.md`. P25 hoá ra sai thứ tự, P25-v2
+sửa lại và đã áp. P28 (hạ nhiệt 200) không giúp tơ và bị nghi hại mặt trên, P29
+trả lại 205. P30 bật `purge_in_prime_tower` — bằng chứng trực tiếp là purge bị
+bỏ qua sau đổi màu khi FIGURE in không support. P26 tăng `retraction_length`
+lên 1.8 cho tơ còn sót ở chi tiết nhỏ.
 
 ---
 
-## Đang chờ
+## P32 — bật lại `purge_in_prime_tower` (chỉ sửa được bằng file)
 
-<a id="p6"></a>
-### P6 ⏳ Bắt được travel ngắn ở đỉnh — machine preset
+🔴 **Khoá này không có trong UI của slicer 2.0.0.2** — không phải Viet tìm sót.
+Xem mục "Vì sao không thấy trên UI" trong `docs/preset-model.md` mục 8.
 
-| Key | Hiện tại | Đặt |
-|---|---|---|
-| `retraction_minimum_travel` | 1 | **0.5** |
+Đây là khoá P30 (30/08) từng bật vì bằng chứng đọc từ gcode: khi in nhiều màu
+mà bản in **không có support**, không còn đường xả hợp lệ nên purge sau đổi màu
+bị bỏ qua hoàn toàn. Đợt dựng lại 03/09 làm mất override này.
 
+Chỉ áp cho bản MultiColor — in một màu không có đổi màu nên khoá vô nghĩa.
+
+```bash
+python tools/acslicer_tune.py --set "Kobra X 0.4 - MultiColor|purge_in_prime_tower=1"
 ```
-python tools/acslicer_tune.py --set "Anycubic Kobra X 0.4 nozzle - high quality|retraction_minimum_travel=0.5"
-```
 
-Bước nhảy ngắn hơn 1 mm hiện **không** rút nhựa — ở đỉnh model tiết diện nhỏ thì
-gần như mọi bước nhảy đều ngắn hơn thế.
+🟡 Điều kiện: đóng slicer trước. Công cụ tự backup `user\` và bump `updated_time`.
 
-🟢 **Đã gỡ chặn.** Điều kiện đặt ra là "in một bản với P15, còn tơ thì chạy P6".
-Bản in 29/08 đã chạy đủ P15 và **vẫn rất nhiều tơ**. Điều kiện thoả.
-
-🔴 **Và nó còn giải thích triệu chứng thứ ba.** Z-hop chỉ xảy ra **kèm theo
-retraction**. Travel ngắn hơn `retraction_minimum_travel` thì không rút, nên cũng
-**không nhấc đầu in** — nozzle rê thẳng ngang qua bề mặt vừa in. Trên mặt trên
-đầy travel ngắn, đó chính là vết xước.
-
-Hạ xuống 0.5 làm cả hai việc cùng lúc: rút nhựa ở quãng ngắn, và bật z-hop ở
-những quãng đó.
-
-🟡 Đánh đổi khi chạy: số lần rút tăng, mài nhựa nhiều hơn ở một điểm.
+🔵 Cách kiểm sau khi áp: slice một mẫu 4 màu không support, tìm khối purge trong
+gcode ngay sau mỗi lệnh đổi màu.
 
 ---
 

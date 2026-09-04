@@ -11,8 +11,9 @@ Quy tắc ai được sửa gì: `docs/working-rules.md`.
 |---|---|
 | ❌ Nói chuyện với máy in | Slicer đi qua `mqtts://mqtt-universe.anycubic.com:8883`, không phải LAN. Token có trong `.conf` nhưng không dùng. Máy in và máy tính hiện còn khác mạng WiFi |
 | ❌ Xem camera, theo dõi print đang chạy | |
+| ❌ Sửa hành vi macro `G9111` (mồi nhựa, wipe, home, cân bàn lúc bắt đầu in) | Macro định nghĩa trong `printer.cfg` **trên bo mạch máy in**, không phải file nào trong `%APPDATA%\AnycubicSlicerNext\`. `machine_start_gcode` chỉ gọi macro này bằng một dòng |
 | ❌ Đo đùn thiếu/thừa, stringing, độ bám, ringing | chỉ bạn nhìn được vật in |
-| ❌ Biết cuộn nhựa thật đang nạp | đọc `profiles/filament.md`; file sai thì sai theo |
+| ❌ Biết cuộn nhựa thật đang nạp | đọc `profiles/filament.md`; file sai thì sai theo. 🔴 Từ slicer 2.0.0.2, `.conf` **không còn** `filament_colors` và bảng gán slot→preset — hết cả nguồn kiểm chứng gián tiếp |
 | ❌ Nhớ phiên trước | mỗi phiên bắt đầu trắng — bù bằng `CLAUDE.md`, `TODO.md`, `git log` |
 
 🟡 Hệ quả của ba dòng giữa: **mọi con số Claude đưa ra là suy từ config hoặc lấy
@@ -30,7 +31,7 @@ từ profile hãng, không phải đo trên máy bạn.** Rõ nhất ở
 
 ## 3. Làm được ngay, không cần hỏi
 
-Đọc và giải chuỗi kế thừa của toàn bộ kho preset (643 của hãng + 14 của bạn),
+Đọc và giải chuỗi kế thừa của toàn bộ kho preset (629 của hãng + 9 của bạn),
 đối chiếu với giới hạn firmware và vật lý đùn nhựa, chỉ ra bạn đã đổi gì so với
 bản gốc. Sửa các mâu thuẫn nội tại và dọn key rác. Đọc log slicer, đọc `.gcode`,
 `.3mf`. Viết script xử lý hàng loạt. Giải thích một setting làm gì và đánh đổi ra sao.

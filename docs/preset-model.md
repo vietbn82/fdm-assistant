@@ -97,7 +97,8 @@ dùng thì nhét vào trong được, tiết kiệm nhựa. Cùng một máy, ha
 
 ```
 %APPDATA%\AnycubicSlicerNext\
-  AnycubicSlicerNext.conf      trạng thái app + bộ ba preset đang chọn
+  AnycubicSlicerNext.conf      trạng thái app + machine preset đang chọn
+                               🔵 bản 2.0.0.2 bỏ filament_colors và bảng gán slot
   system\Anycubic\             preset hãng — CHỈ ĐỌC
   user\855643\                 preset của bạn
     machine\ process\ filament\    *.json
@@ -121,6 +122,10 @@ file khi slicer đang mở = mất trắng khi nó đóng. Luôn đóng slicer t
 `filament\base\PLA Bambulab Lite@KX 0.4.json` và
 `filament\PLA Bambulab Lite@KX 0.4.json` có cùng `"name"` bên trong. Bản trong `base\` là ảnh chụp cache đầy đủ; bản
 top-level mới là preset sống. Đọc nhầm sẽ ra giá trị cũ.
+
+🔵 **Tính đến 03/09 (slicer 2.0.0.2) `filament\base\` đang rỗng** — đợt dựng lại
+preset đã dọn sạch. Bẫy vẫn còn hiệu lực: slicer sinh lại `base\` bất cứ lúc
+nào, đừng bỏ bước kiểm.
 
 **Bẫy 3 — sửa `.json` mà quên `.info` thì cloud sync khôi phục lại bản cũ.**
 Sync so `updated_time` trong `.info`. Không tăng số đó, nó coi file trên máy bạn
@@ -147,7 +152,7 @@ flow, rồi in. Hậu quả:
 
 - Số hiển thị trong UI không phải tốc độ thật
 - Thời gian ước tính sai theo
-- Mọi preset kế thừa từ đó — tức là **cả bảy** process preset của bạn — thừa
+- Mọi preset kế thừa từ đó — tức là **cả năm** process preset của bạn — thừa
   hưởng nguyên mâu thuẫn này
 
 🔵 Cùng hotend, preset `Anycubic PLA High Speed @Kobra X` của hãng dùng 18 mm³/s.
@@ -155,3 +160,93 @@ flow, rồi in. Hậu quả:
 
 ❌ Đừng sửa bằng cách hạ tốc độ trong process preset — đó chính là lỗi nhầm tầng
 ở mục 3. Slicer đã tự lo phần đó rồi.
+
+## 7. Project (`.3mf`) có thể mang bản chụp preset riêng, không ăn theo thư viện
+
+Phát hiện 30/08. Sửa `PLA Generic@KX 0.4` trong thư viện (`user\855643\filament\`)
+**không đảm bảo** một project đã lưu sẽ dùng bản mới.
+
+Bản in 30/08 10:45, hai màu cùng gán preset tên `PLA Generic@KX 0.4`, nhưng gcode
+cho ra hai giá trị nhiệt khác nhau:
+
+```
+filament_settings_id = ["PLA Generic@KX 0.4", "PLA Generic@KX 0.4(keychain_Daniel.3mf)"]
+nozzle_temperature   = [200, 205]
+```
+
+Slot 1 (`filament`) đọc đúng bản thư viện mới nhất (200, sau P28). Slot 2
+(`filament_01`) bị **đóng băng** ở một bản chụp cũ hơn — tên có hậu tố
+`(keychain_Daniel.3mf)`, thời điểm chụp nằm giữa P15 (flow=1.0, đã có) và P28
+(nhiệt=200, chưa có) — tức chụp lúc project được lưu, ở đâu đó giữa 29/08 và
+sáng 30/08.
+
+🔴 **Cơ chế:** khi một object/slot trong project được gán filament preset, slicer
+nhúng một bản sao cấu hình *tại thời điểm đó* vào file project. Sửa preset trong
+thư viện sau đó chỉ cập nhật những slot **chưa từng bị đóng băng** — slot đã có
+bản chụp riêng thì im lặng giữ nguyên, không có cảnh báo nào.
+
+❌ **Hệ quả cho quy trình:** không thể tin gcode của một project **đã lưu từ
+trước** phản ánh đúng preset thư viện hiện tại, dù `filament_settings_id` ghi
+đúng tên. Phải đọc `nozzle_temperature` / `filament_flow_ratio` thật trong
+gcode, không suy từ tên preset.
+
+🟡 **Cách buộc một slot đồng bộ lại:** trong slicer, mở lại dropdown chọn
+filament cho đúng slot đó và chọn lại `PLA Generic@KX 0.4` từ thư viện — thao
+tác này thay bản chụp cũ bằng tham chiếu mới. Xoá object rồi thêm lại cũng được.
+
+📝 Không có cách nào phát hiện từ `.conf` hay từ preset trên đĩa — chỉ thấy được
+khi đọc gcode/project đã xuất ra.
+
+
+## 8. Có khoá slicer đọc nhưng UI không cho sửa
+
+Phát hiện 04/09 với `purge_in_prime_tower`: không tìm thấy ở đâu trong UI 2.0.0.2,
+kể cả Advanced mode và ô tìm kiếm setting.
+
+🔵 **Khoá có thật và slicer vẫn dùng khi slice.** Label + tooltip dựng sẵn trong
+`AnycubicSlicer.dll`, và có 10 chỗ trong code tham chiếu tới tên khoá:
+
+```
+"Purge in prime tower"  /  "Purge remaining filament into prime tower."
+```
+
+🔴 Nhưng **chỉ đúng một chỗ trong code dựng ô nhập cho nó**, và chỗ đó không bao
+giờ chạy trên Kobra X:
+
+| Nơi | Nội dung | Có hiện không |
+|---|---|---|
+| Printer Settings → *Multimaterial* → nhóm **Wipe tower** | `enable_filament_ramming`, **`purge_in_prime_tower`**, `printer_flush_multiplier` | ❌ trang chỉ được dựng khi `extruders_count > 1` |
+| Print Settings → *Multimaterial* → nhóm **Prime tower** | `enable_prime_tower`, `prime_tower_width`, `prime_volume`, `prime_tower_brim_width`, `wipe_tower_*`, `single_extruder_multi_material_priming` | ✅ có trang, nhưng **không chứa** `purge_in_prime_tower` |
+
+Kobra X khai **một** extruder (`nozzle_diameter` là mảng 1 phần tử, không có
+`extruders_count`) — đổi màu do firmware ACE lo, không phải nhiều extruder. Nên
+trang Printer → Multimaterial không tồn tại, và ô đó không bao giờ được vẽ.
+
+🟡 **Bản Anycubic không có Expert mode.** Chuỗi `"Expert"` không tồn tại trong
+DLL; chỉ có một công tắc Advanced (`ParamsPanel::OnToggled`, log
+`Advanced mode toogle to %1%`). Không có mức nào cao hơn để lộ thêm khoá.
+
+🔵 Ô tìm kiếm setting chỉ quét khoá **đã nằm trên một trang** — khoá không thuộc
+trang nào thì tìm cũng không ra.
+
+✅ **Cách sửa duy nhất: ghi thẳng file preset.**
+
+```bash
+python tools/acslicer_tune.py --set "Kobra X 0.4 - MultiColor|purge_in_prime_tower=1"
+```
+
+❌ Đừng đặt `extruders_count = 2` để ép trang hiện ra. Nó kéo theo mảng
+`nozzle_diameter` / `extruder_offset` / lệnh `T`, sai hẳn mô hình máy.
+
+🟡 Slicer **không** xoá khoá lạ khi lưu lại preset — P30 (30/08) đặt bằng file và
+sống qua nhiều phiên. Nhưng vì UI không hiện, khoá kiểu này biến mất lặng lẽ khi
+dựng lại preset từ đầu, đúng như đã xảy ra 03/09.
+
+### Cách kiểm một khoá có sửa được bằng UI không
+
+❌ Đừng đếm số lần chuỗi xuất hiện trong DLL — compiler gộp chuỗi trùng, một khoá
+dùng ở mười chỗ vẫn chỉ có một chuỗi. Đếm kiểu đó cho kết luận sai.
+
+✅ Đếm **lệnh code trỏ tới chuỗi** (`lea reg,[rip+disp32]`), rồi xem hàm nào chứa
+chúng: hàm dựng trang có kèm tiêu đề nhóm (`"Prime tower"`, `param_tower`) và một
+dãy tên khoá liền nhau. Không có hàm nào như vậy → khoá không có ô nhập.

@@ -64,7 +64,7 @@ cho vừa — số hiển thị trong slicer thành vô nghĩa.
 
 | | |
 |---|---|
-| Anycubic Slicer Next | 1.4.1.2, build `20260604104233` |
+| Anycubic Slicer Next | 2.0.0.1 *(cập nhật 02/09 — trước là 1.4.1.2, xem `CHANGELOG.md`)* |
 | Nhân | dẫn xuất OrcaSlicer / BambuStudio — schema preset giống hệt |
 | Region / Language / Đơn vị | Global / en_GB / mm |
 | Tài khoản cloud | user id `855643`, đã đăng nhập |

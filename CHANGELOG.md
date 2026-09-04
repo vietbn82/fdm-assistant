@@ -7,7 +7,1021 @@ Diff từng dòng preset nằm ở `git log -- presets/`.
 
 ---
 
+## 2026-09-03
+
+### Viet dựng lại toàn bộ preset trên slicer 2.0.0.2 — lấy máy làm chuẩn
+
+Viet chỉnh tay trong UI, không qua `tools/acslicer_tune.py`. Theo
+`docs/working-rules.md` mục 6: **slicer thắng**. Đã chạy `--export`, đồng bộ
+`presets/` và viết lại `profiles/` theo đúng những gì đọc từ đĩa. ❌ Không khôi
+phục gì từ git hay `user_backup-*`.
+
+🟢 `--check-drift` báo 30 file lệch trước khi export. `--audit` sau export:
+**0 lỗi, 1 warning** (top shell 2×0.28 = 0.56 mm trên `0.28 TEST`), 18 mục
+flow-capped.
+
+**Đổi tên toàn bộ** *(theo mục 10 — chỉ thêm dòng ghi nhận, không sửa mục cũ)*:
+
+| Cũ | Mới |
+|---|---|
+| `Anycubic Kobra X 0.4 nozzle - high quality` | `Kobra X 0.4 - Single Color` |
+| `Anycubic Kobra X 0.4 nozzle - high quality - TEST` | `Kobra X 0.4 - MultiColor` |
+| `Novi 0.12 - FIGURE @AC KX` | `0.12 Figure @AC KX` |
+| `Novi 0.16 - FIGURE @AC KX` | `0.16 FIGURE @AC KX` |
+| `Novi 0.20 - FIGURE @AC KX` | `0.20 Figure @AC KX` |
+| `Novi 0.20 - TOOL @AC KX` | `0.20 TOOL @AC KX` |
+| `Novi 0.28 - TEST @AC KX` | `0.28 TEST @AC KX` |
+
+🔵 Hai machine preset không còn tách theo `z_hop` (0.2 / 0.4) mà tách theo **số
+màu**: Single Color không đè khoá nào, MultiColor đè năm khoá retraction.
+`Novi 0.20 - FIGURE @AC KX -dinosaur` (preset project riêng, 02/09) đã bị xoá —
+còn 9 preset user.
+
+**Cấu trúc tốt lên**:
+
+- 🟢 `0.20 Figure` kế thừa đúng `0.20mm High Quality`, hết vá `layer_height` tay
+  — **B1 đóng lại**
+- 🟢 `filament\base\` giờ rỗng, không còn file trùng tên (bẫy 2)
+- 🟢 Preset user mỏng hẳn: filament 5–7 khoá, process 6–15, machine 0–5
+
+**Override đã bỏ, cần theo dõi** — chi tiết trong `profiles/`:
+
+| Tầng | Bỏ | Hệ quả |
+|---|---|---|
+| filament | `filament_flow_ratio = 1` (P14/P15) | 🔴 về 0.96, đùn ít hơn 4% — B2 |
+| filament | `filament_density`, `overhang_fan_threshold`, `slow_down_*` | 🔵 về giá trị hãng |
+| filament | nhiệt HS 205 → 203 (BBL) / **200** (Generic) | 🟡 Generic quay lại mức P28 đã bỏ |
+| machine | `z_hop = 0.2`, `z_hop_types = Normal Lift` (P10) | 🟢 hết cảnh báo z_hop < layer 0.28 |
+| machine | `purge_in_prime_tower = 1` (P30) | 🟡 purge có thể bị bỏ qua khi in nhiều màu không support |
+| process | `top_surface_speed = 80` (P21) | 🟡 về 150, mức từng bị chê mặt trên xấu |
+| process | `outer_wall_speed`, `initial_layer_speed` (0.12/0.16), `detect_thin_wall`, `small_perimeter_threshold`, `skirt_loops` | 🔵 về giá trị hãng |
+| process | TOOL: `wall_loops` 4→2, infill 25%→15%, `wall_sequence`, `flush_into_*` | 🔴 độ bền giảm rõ — B4 |
+| process | TEST: `brim_type = no_brim` | 🔵 về `auto_brim` |
+
+🟢 Giữ nguyên: `filament_retraction_length = nil` (để machine quyết),
+`textured_plate_temp` 50/55, `pressure_advance = 0.036`, flow cap 13,
+`seam_gap 15%` + `wipe_*` + scarf joint trên FIGURE, `flush_into_*` trên TEST.
+
+🔴 **`.conf` bản 2.0.0.2 không còn lưu `filament_colors` và bảng gán
+slot→preset.** Mục `presets` chỉ còn `filaments` (mảng cờ) và `machine`. Từ nay
+bảng slot trong `profiles/filament.md` không kiểm chứng lại được bằng config —
+xác nhận cuối là 29/08 trên bản 1.4.x. Ma trận flush cũng chỉ đọc lại được bằng
+cách slice một mẫu 4 màu rồi đọc gcode.
+
+📝 Sinh ra B2, B3, B4 trong `TODO.md` — hỏi cho rõ ý định, không phải đề xuất
+khôi phục.
+
+📘 Báo cáo so sánh ảnh hưởng trước/sau đầy đủ (định lượng từng khoá, xếp hạng
+rủi ro, bảng hoàn tác): `IMPACT-2026-09-03.md`.
+
+## 2026-09-02 (2)
+
+### Slicer đã update lên v2.0.0.1 — soát thư viện hãng, không phát sinh lỗi
+
+Đọc từ `.conf`: `"version": "2.0.0.1"`. Không có bộ nhớ giữa phiên nên không tự
+biết được — Viet báo mới hay.
+
+🔵 **Tính năng chính bản 2.0** (theo trang chủ Anycubic, không tìm được changelog
+chi tiết cấp preset công khai): giao diện Workspace mới, quản lý file cloud +
+local, Print History (tìm/lọc/in lại), thêm điều khiển máy in (AI Detection,
+Calibration, Print Assistance, điều khiển đùn/nozzle/bàn nhiệt). Khuyến nghị
+cập nhật **firmware máy in dòng KX lên V2.0.0** trước khi dùng bản slicer này —
+đáng chú ý vì macro `G9111` (mồi nhựa/home/cân bàn) nằm trong firmware, không
+phải trong preset.
+
+🟢 **Preset thứ 10 xuất hiện: `Novi 0.20 - FIGURE @AC KX -dinosaur`.** Viet xác
+nhận: preset riêng cho một project cụ thể, không cần theo dõi trong
+`profiles/process.md`.
+
+🟢 **Soát thư viện hãng (630 file / 629 index được, trước là 643) — chuỗi kế
+thừa của cả 10 preset user vẫn resolve đúng, `--audit` 0 lỗi.** Đối chiếu giá
+trị các preset cha đang dùng với số đã ghi trong `profiles/`:
+
+| Preset cha | Key | Đã ghi trước | Hiện tại | |
+|---|---|---|---|---|
+| `Anycubic Kobra X 0.4 nozzle` (machine) | retraction/z_hop/wipe/nozzle_volume/... | — | **không đổi** | 🟢 khớp toàn bộ bảng "Hãng" trong `profiles/printer.md` |
+| `Anycubic PLA @Anycubic Kobra X 0.4 nozzle` (filament) | `nozzle_temperature_HS`, `filament_flow_ratio`, `filament_retraction_length`, `filament_max_volumetric_speed` | 220 / 0.96 / 0.8 / 13 | **không đổi** | 🟢 |
+| `0.16mm High Quality @Anycubic Kobra X 0.4 nozzle` (process) | `sparse_infill_density` | **12%** *(B2, 30/08)* | **15%** | 🔴 hãng đã đổi mặc định |
+
+🔴 **Một drift thật:** `0.16mm High Quality` — cha thật của `Novi 0.20 -
+FIGURE @AC KX` (do lỗi kế thừa sai đã biết, B1) — đổi `sparse_infill_density`
+gốc từ 12% lên 15%. Override tay 15% đặt ngày 30/08 (B2, để khớp 0.16 lúc đó
+cha còn 12%) giờ **trùng giá trị cha mới** — không sai, nhưng có thể bị slicer
+tự bỏ khỏi file khi mở lại (không phải bug, xem hành vi tương tự ở
+`profiles/process.md` mục FIGURE). Không cần sửa gì — hiệu lực vẫn là 15% dù
+đọc từ override hay từ cha.
+
+📝 B1 (kế thừa sai cha của `Novi 0.20 - FIGURE`) vẫn treo, không nằm trong
+`TODO.md` hiện tại — nêu lại ở đây vì bản update này chạm đúng preset cha bị
+ảnh hưởng.
+
+## 2026-09-02
+
+### P31 🟢 áp — `machine_end_gcode` trả về gốc hãng, bỏ P16 + P25-v2
+
+Viet báo kẹt nhựa thường xuyên khi in slot 4, nghi `machine_end_gcode` là thủ
+phạm, yêu cầu bỏ hết. **Đã cảnh báo trước khi ghi:** đoạn này chỉ chạy sau khi
+in xong, không chạy giữa lúc đang in — khó giải thích được kẹt nhựa xảy ra
+trong lúc in. Viet vẫn chọn bỏ, ghi lại theo yêu cầu.
+
+Backup `user_backup-tune-set-20260902-085908`.
+
+| Preset | Key | Cũ | Mới |
+|---|---|---|---|
+| `Anycubic Kobra X 0.4 nozzle - high quality` | `machine_end_gcode` | P16 + P25-v2 (retract 6mm + wipe + z-hop trước khi tắt nhiệt) | **gốc hãng** — thẳng `M400` → tắt bàn/nhiệt/fan/motor, không retract |
+| `Anycubic Kobra X 0.4 nozzle - high quality - TEST` | `machine_end_gcode` | như trên | như trên |
+
+Đọc lại xác nhận cả hai. `--audit`: 0 lỗi, 2 warning cũ không đổi (`z_hop` FIGURE/TOOL,
+top shell TEST 0.28) — không phát sinh finding mới từ thay đổi này.
+
+🔴 **Rủi ro chưa kiểm chứng, cần theo dõi:** bỏ retract cuối bản in nghĩa là
+nozzle đầy nhựa chịu áp nguội dần giữa hai lần in trở lại — đúng vấn đề P16
+từng sửa (oozing/đọng cục ở đầu phun, xem C2 trong lịch sử 29/08). Có thể sinh
+ra một kiểu nghẹt khác cho lần in kế tiếp, chứ không chắc hết kẹt nhựa đang gặp.
+
+🔵 Nghi phạm hợp lý hơn cho triệu chứng gốc (load tay ra nhựa, in thì không) vẫn
+chưa kiểm: nghiến nhựa ở bánh răng đùn (grinding) hoặc nghẹt một phần — xem
+mục dưới đây.
+
+### Kẹt nhựa thường xuyên slot 4 — chẩn đoán, chưa xử lý
+
+Viet báo "thường xuyên bị tắt nhựa khi in slot 4". Đã loại được nghẹt cứng đầu
+nozzle kiểu 30/08: load filament từ màn hình máy vẫn ra nhựa bình thường, chỉ
+lúc in mới không ra — khác triệu chứng 30/08 (lúc đó load tay cũng fail).
+
+🔵 slot 2 và slot 4 dùng chung preset `PLA Generic@KX 0.4`, slot 2 không báo lỗi
+→ preset không phải nghi phạm chính.
+
+Nghi phạm còn treo, cần Viet kiểm tay (Claude không xem/đo phần cứng được):
+
+1. **Nghiến nhựa (grinding) tại bánh răng đùn** — gear cắn lặp lại đúng 1 điểm
+   lúc rút/đẩy đổi màu (buồng chung 79mm³) → mòn rãnh → trượt. Kiểm: vết mòn/bột
+   nhựa quanh bánh răng, tiếng click lặp lúc lỗi.
+2. **Nghẹt một phần** — đủ thông cho lưu lượng thấp (load tay), không đủ cho
+   lưu lượng cao (in).
+3. **Kẹt/rối cuộn slot 4 trên trục hoặc ống dẫn** — load tay đẩy đoạn ngắn chưa
+   chạm điểm kẹt, in kéo dài quãng đường mới chạm.
+
+📝 Chuyển thành A10 trong `TODO.md`, chờ Viet kiểm tay và báo lại.
+
+## 2026-08-30
+
+### B2 áp — đồng bộ `prime_tower_width` và `sparse_infill` theo 0.16
+
+Viet chốt: cả ba bản FIGURE theo 0.16. Backup
+`user_backup-tune-set-20260830-202701`.
+
+| Preset | Key | Cũ | Mới |
+|---|---|---|---|
+| `Novi 0.12 - FIGURE` | `prime_tower_width` | 35 *(kế thừa)* | **10** |
+| `Novi 0.12 - FIGURE` | `sparse_infill_density` | 18% | **15%** |
+| `Novi 0.20 - FIGURE` | `prime_tower_width` | 30 *(kế thừa)* | **10** |
+| `Novi 0.20 - FIGURE` | `sparse_infill_density` | 12% | **15%** |
+| `Novi 0.20 - FIGURE` | `sparse_infill_pattern` | grid | **gyroid** |
+
+Đọc lại xác nhận cả năm. Cập nhật `profiles/process.md`.
+
+### B3 áp — tạo machine preset thứ hai riêng cho TEST 0.28
+
+Backup `user_backup-tune-b3-create-test-machine-20260830-202720`. Tạo mới
+(không qua `--set` vì đó là preset chưa tồn tại):
+
+```
+Anycubic Kobra X 0.4 nozzle - high quality - TEST
+```
+
+Nhân bản y hệt preset chính (`retraction_length=1.6`, `purge_in_prime_tower=1`,
+`machine_end_gcode` P16+P25-v2...), chỉ đổi `z_hop = 0.4` thay vì 0.2.
+
+Lý do: `z_hop` không tồn tại ở tầng process trong schema slicer này (đã kiểm
+`fdm_process_common.json` và toàn bộ preset process của hãng — không có ở
+đâu). Không override riêng cho `Novi 0.28 - TEST @AC KX` được, nên chỉ còn cách
+tách hẳn một machine preset khác.
+
+`tools/acslicer_tune.py --list` xác nhận preset mới được index đúng.
+`--audit`: preset mới không bị cảnh báo z_hop (0.4 ≥ 0.28), preset chính vẫn
+cảnh báo như cũ (0.2 < 0.28, chỉ dùng cho FIGURE/TOOL). Mirror push `1cf4e19`.
+
+🔴 **Hai preset không tự đồng bộ với nhau.** Sửa retraction/purge/end-gcode ở
+preset chính sau này phải nhớ áp lại cho bản TEST — ghi thành quy tắc trong
+`profiles/printer.md`.
+
+🟡 Viet phải tự chọn đúng Printer preset trong slicer khi in bằng
+`Novi 0.28 - TEST @AC KX` — không có liên kết tự động giữa machine và process
+preset.
+
+
+### FIGURE 0.16 làm chuẩn — soát và đồng bộ 0.12, 0.20
+
+Viet yêu cầu. Đọc giá trị **hiệu dụng** (qua chuỗi kế thừa, không chỉ override
+thô) của cả ba preset để so sánh công bằng.
+
+**0.12 đã khớp 0.16** ở mọi giá trị hiệu dụng — không cần sửa.
+
+**0.20 lệch thật**, chưa từng đồng bộ từ lúc Viet tạo 25/08. Backup
+`user_backup-tune-set-20260830-194406`.
+
+| Preset | Key | Cũ | Mới |
+|---|---|---|---|
+| `Novi 0.20 - FIGURE` | `initial_layer_speed` | 50 *(kế thừa)* | **30** |
+| `Novi 0.20 - FIGURE` | `initial_layer_infill_speed` | 200 | **50** |
+| `Novi 0.20 - FIGURE` | `reduce_crossing_wall` | 0 *(kế thừa)* | **1** *(P19)* |
+| `Novi 0.20 - FIGURE` | `max_travel_detour_distance` | 0 *(kế thừa)* | **40** *(P19)* |
+| `Novi 0.20 - FIGURE` | `top_surface_speed` | 150 *(kế thừa)* | **80** *(P21)* |
+
+Đọc lại xác nhận cả năm. `--audit` không thêm lỗi. Mirror push `4c37666`.
+
+🔴 `initial_layer_infill_speed = 200` đáng chú ý nhất — ngược hẳn logic "chậm
+hơn để bám bàn" áp cho 0.12/0.16 từ 25/08. 0.20 đã chạy sai giá trị này hơn
+5 ngày mà không ai để ý vì preset ít dùng.
+
+🟡 **Còn hai khoá khác nhau, chưa tự sửa — chờ Viet quyết:**
+
+| Key | 0.12 | 0.16 | 0.20 |
+|---|---|---|---|
+| `prime_tower_width` | 35 | **10** *(P22, Viet cố ý riêng 0.16)* | 30 |
+| `sparse_infill_density`/`pattern` | 18%/gyroid | 15%/gyroid | 12%/grid |
+
+Không tự đổi vì `prime_tower_width=10` được ghi rõ là lựa chọn riêng cho 0.16;
+`sparse_infill` khác nhau ba bản có thể là chủ ý (mỗi lần tạo cho một model cụ
+thể), không phải bug.
+
+Đã cập nhật `profiles/process.md` mục FIGURE 0.20.
+
+### Câu hỏi: override `z_hop` riêng cho `Novi 0.28 - TEST @AC KX`?
+
+🔴 **Không được — sai tầng, không phải chưa muốn làm.** Kiểm toàn bộ
+`fdm_process_common.json` (template gốc mọi process preset kế thừa) và cả cây
+preset process của hãng: `z_hop` **không tồn tại** ở tầng process trong schema
+của slicer này, chỉ có ở machine. Ghi `z_hop` vào JSON của một process preset
+thì slicer không đọc được key đó ở ngữ cảnh in — vô nghĩa.
+
+Máy chỉ có một machine preset active tại một thời điểm, không tự đổi theo
+process preset đang chọn. Muốn TEST dùng z_hop=0.4 trong khi FIGURE dùng 0.2,
+cách duy nhất là tạo **machine preset thứ hai** riêng cho TEST và tự tay chuyển
+Printer preset khi in TEST — phá vỡ quy ước "chỉ một machine preset" đang giữ.
+Chưa làm, chờ Viet xác nhận có muốn đánh đổi đó không.
+
+
+### `z_hop` hạ xuống 0.2 — cùng loại rủi ro đã gặp trước
+
+Backup `user_backup-tune-set-20260830-193915`.
+
+| Key | Cũ | Mới |
+|---|---|---|
+| machine `z_hop` | 0.4 | **0.2** |
+
+Đọc lại xác nhận. Mirror push `fa2a235`.
+
+🟡 **`--audit` tự báo đúng cảnh báo cũ:** `z_hop 0.2 < max layer height 0.28 -
+hop lands inside the layer it should clear, nozzle still collides`. An toàn với
+mọi process FIGURE đang dùng (0.12/0.16/0.20), nhưng `Novi 0.28 - TEST @AC KX`
+thì cú nhấc không đủ vượt lớp. Đã báo trước khi ghi, Viet chọn vẫn áp.
+
+Đã cập nhật `profiles/printer.md` — nhân tiện đồng bộ lại cả bảng key/value
+(nhiều dòng đã lệch thực tế nhiều ngày: `retraction_length` còn ghi 1.2 trong
+khi đĩa đã là 1.6, `purge_in_prime_tower` còn ghi 0/pending trong khi đã bật).
+
+
+### B1 áp — bật lại scarf cho FIGURE
+
+Backup `user_backup-tune-set-20260830-193738`.
+
+| Preset | Key | Cũ | Mới |
+|---|---|---|---|
+| `Novi 0.12 - FIGURE @AC KX` | `seam_slope_type` | none | **external** |
+| `Novi 0.16 - FIGURE @AC KX` | `seam_slope_type` | none | **external** |
+
+Ba khoá chết (`seam_slope_conditional=0`, `seam_slope_min_length=5`,
+`scarf_joint_flow_ratio=0.95`) đã sẵn trên đĩa từ 25/08, không cần ghi lại —
+chỉ cần bật `seam_slope_type` là sống lại nguyên vẹn. Đọc lại xác nhận cả hai.
+`--audit` 0 lỗi. Mirror push `00dd308`.
+
+### A2, A8 xoá khỏi TODO
+
+Viet chốt: không cần theo dõi tiếp cả hai.
+
+- **A2** (đo PA thật) — cấu hình hiện tại đã cho bản in đẹp bằng PA kế thừa
+  (0.036), không cần đo thêm
+- **A8** (nhựa thừa đầu bản in, macro `G9111`) — giới hạn phần cứng đã ghi
+  thường trực ở `docs/capabilities.md` mục 1, không cần giữ trong TODO nữa
+
+Kiến thức nền tảng vẫn còn nguyên trong `docs/capabilities.md` và
+`CHANGELOG.md` — chỉ bỏ khỏi danh sách việc treo.
+
+
+### Nozzle sạch, bản in đẹp — đóng chuỗi tơ/mặt trên/nghẹt kéo dài hai ngày
+
+Viet xác nhận bản in 1 màu sau cold pull: **đẹp**. Đóng A10 (nozzle đã sạch) và
+C9 (tơ + mặt trên nghiệm thu xong) cùng lúc.
+
+**Cấu hình đang chạy tốt, chốt lại làm mốc:**
+
+| Preset | Key | Giá trị |
+|---|---|---|
+| machine | `retraction_length` | 1.6 |
+| machine | `retraction_minimum_travel` | 0.5 |
+| machine | `retraction_speed` / `retract_before_wipe` | 45 / 100% |
+| machine | `z_hop_types` | Normal Lift |
+| machine | `purge_in_prime_tower` | 1 |
+| machine | `machine_end_gcode` | P16 + P25-v2 (retract đủ rồi mới wipe) |
+| 2× filament | `pressure_advance` | 0.036 *(kế thừa — chưa đo lại, nhưng đang chạy tốt)* |
+| 2× filament | `textured_plate_temp` / `_initial_layer` | 50 / 55 |
+| 3× FIGURE | `top_surface_line_width` | 0.42 *(mặc định hãng)* |
+| 2× FIGURE | `brim_type` / `wall_loops` / `ironing_type` | mặc định hãng (auto_brim / 2 / no ironing) |
+
+🔵 **Không rõ nghẹt đã hết nhờ cold pull, hay tơ/mặt trên hết nhờ trả PA và line
+width về mặc định hãng, hay cả hai.** Không cố tách — kết quả tốt là đủ, không
+cần quy công cho từng thay đổi ở đây.
+
+📝 **A2 (đo PA thật) và B1 (bật lại scarf) chuyển sang không khẩn** — cấu hình
+hiện tại đã cho kết quả tốt bằng `pressure_advance` kế thừa (0.036). Vẫn có thể
+làm nếu Viet muốn tối ưu thêm, nhưng không còn là việc phải làm để hết lỗi.
+
+
+### Nghẹt nozzle xác nhận qua triệu chứng vật lý — rồi Viet đảo cả PA lẫn line width
+
+Chuỗi troubleshooting phần cứng: in slot 4 không ra nhựa → load slot 4 từ màn
+hình cũng không ra → load slot 1 cũng không ra (loại bỏ nguyên nhân riêng slot
+4, chỉ về điểm chung) → unload được, load không được. **Rút được, đùn không
+được = dấu hiệu kinh điển của nghẹt đầu nozzle**, không phải hỏng motor hay
+hỏng heater. Đã hướng dẫn cold pull.
+
+### PA trả về 0.036; `top_surface_line_width` trả về 0.42
+
+Sau cold pull, Viet báo "thiếu nhựa rất nhiều", top surface rất mỏng — yêu
+cầu hạ PA về 0.036 (từ 0.32 đo hôm nay) và tăng lại line width.
+
+🟡 **Đã cảnh báo trước khi ghi:** thiếu nhựa lúc này nhiều khả năng vẫn là dư
+âm của nghẹt chưa sạch hẳn, không hẳn do PA hay line width. Đổi preset ngay
+lúc này che mất khả năng phân biệt hai nguyên nhân — Viet chọn đổi vẫn, ghi lại
+theo yêu cầu.
+
+Backup `user_backup-tune-set-20260830-171817`.
+
+| Preset | Key | Cũ (đo hôm nay) | Mới |
+|---|---|---|---|
+| `PLA Generic@KX 0.4` | `pressure_advance` | 0.32 | **0.036** |
+| `PLA Bambulab Lite@KX 0.4` | `pressure_advance` | 0.32 | **0.036** |
+| 3× FIGURE | `top_surface_line_width` | 0.32 | **0.42** *(về đúng giá trị hãng)* |
+
+Đọc lại xác nhận cả năm. `--audit`: cảnh báo "PA very high" biến mất — đúng vì
+0.036 nằm trong dải bình thường. Mirror push `db6f0bf`.
+
+🔴 **Hai giá trị đo được hôm nay (PA 0.32, line width 0.32→0.42 do quá mỏng)
+coi như bị gác lại**, không phải kết luận sai — chỉ là chưa kiểm chứng được vì
+lẫn với sự cố nghẹt nozzle. Cần in lại sau khi chắc chắn nozzle đã sạch mới
+đánh giá lại được cả hai.
+
+
+### A2 đóng — Pressure Advance đo được: 0.32 cho cả hai filament
+
+Viet chạy PA Pattern trên máy thật (đã gỡ được rào cản `T`/bước mồi tự dựng
+trước đó). Kết quả: **cả `PLA Generic@KX 0.4` và `PLA Bambulab Lite@KX 0.4`
+cùng cho 0.32** — gấp ~9 lần giá trị kế thừa cũ (0.036).
+
+🟢 **Hai cuộn ra cùng số là bằng chứng ủng hộ giả thuyết đã theo đuổi suốt hai
+ngày:** buồng nóng chảy dùng chung cho cả 4 màu (`nozzle_volume = 79` mm³, gấp
+4–5 lần hotend đơn màu thường thấy) là yếu tố quyết định PA ở đây, không phải
+đặc tính riêng của từng loại nhựa.
+
+Backup `user_backup-tune-set-20260830-145621`.
+
+| Preset | Key | Cũ | Mới |
+|---|---|---|---|
+| `PLA Generic@KX 0.4` | `pressure_advance` | 0.036 *(kế thừa)* | **0.32** |
+| `PLA Bambulab Lite@KX 0.4` | `pressure_advance` | 0.036 *(kế thừa)* | **0.32** |
+
+Đọc lại xác nhận cả hai. Mirror push `a329194`.
+
+🟡 `--audit` bật thêm 1 warning: `pressure_advance 0.32 very high for direct
+drive PLA`. **Đúng như kỳ vọng, không phải lỗi** — ngưỡng cảnh báo giả định
+hotend đơn màu thông thường, không tính tới buồng nóng chảy dùng chung của đầu
+4-in-1. Ghi chú lại để lần audit sau không báo nhầm.
+
+📝 Giờ có cơ sở để cân nhắc bật lại scarf (`seam_slope_type = external`) cho
+FIGURE — tắt trước đây một phần vì "PA chưa hiệu chuẩn". Chưa áp, chờ Viet
+quyết.
+
+
+### Sau P31 (retraction 1.6) + nhiệt bàn 50/55 — top layer vẫn vừa thiếu vừa thừa nhựa
+
+Viet báo: mặt trên vẫn có chỗ thiếu nhựa, có vài nốt dư nhựa — cả hai cùng tồn
+tại trên cùng một bản in.
+
+🔴 **Cả thiếu lẫn thừa cùng lúc là dấu hiệu PA sai kinh điển, không phải một
+phía.** PA thấp gây phình ở điểm dừng/đổi hướng (thừa); PA cao (hoặc bù chưa
+đủ ngay sau đó) gây hụt nhựa ngay sau (thiếu). Cùng một bản in thấy cả hai
+nghĩa là đang dao động quanh sai số PA, không phải lệch một chiều do
+`retraction_length` hay nhiệt bàn — cả hai đều đã chỉnh và không giải quyết
+được gốc.
+
+📝 Củng cố thêm cho A2 (đo Pressure Advance) là bước còn lại duy nhất, không
+phải dò thêm số retraction hay nhiệt bàn.
+
+
+### Chốt lại nhiệt bàn — lớp đầu 55, các lớp sau 50
+
+Viet chỉnh lại con số vừa đặt: thay vì 55/55 đều, chốt **lớp đầu 55 / các lớp
+sau 50**. Backup `user_backup-tune-set-20260830-133329`.
+
+| Preset | Key | Cũ (55/55) | Mới |
+|---|---|---|---|
+| `PLA Generic@KX 0.4` | `textured_plate_temp` | 55 | **50** |
+| `PLA Generic@KX 0.4` | `textured_plate_temp_initial_layer` | 55 | 55 *(không đổi)* |
+| `PLA Bambulab Lite@KX 0.4` | `textured_plate_temp` | 55 | **50** |
+| `PLA Bambulab Lite@KX 0.4` | `textured_plate_temp_initial_layer` | 55 | 55 *(không đổi)* |
+
+Đọc lại xác nhận cả bốn. `--audit` 0 lỗi, 1 warning cũ. Mirror push `e3637b6`.
+
+🔵 Lớp đầu giữ 55 (cao hơn các lớp sau) để ưu tiên bám bàn; các lớp sau hạ thêm
+xuống 50 — tổng cộng thấp hơn giá trị hãng (60) 10°.
+
+
+### Giảm nhiệt bàn 5° cho cả hai preset filament
+
+Viet yêu cầu, đã hỏi rõ phạm vi trước khi ghi: áp cho **cả `PLA Generic@KX 0.4`
+và `PLA Bambulab Lite@KX 0.4`**, giảm **cả lớp đầu lẫn các lớp sau**.
+
+Backup `user_backup-tune-set-20260830-132917`.
+
+| Preset | Key | Cũ | Mới |
+|---|---|---|---|
+| `PLA Generic@KX 0.4` | `textured_plate_temp` | 60 *(kế thừa)* | **55** |
+| `PLA Generic@KX 0.4` | `textured_plate_temp_initial_layer` | 60 *(kế thừa)* | **55** |
+| `PLA Bambulab Lite@KX 0.4` | `textured_plate_temp` | 60 *(kế thừa)* | **55** |
+| `PLA Bambulab Lite@KX 0.4` | `textured_plate_temp_initial_layer` | 60 *(kế thừa)* | **55** |
+
+Đọc lại xác nhận cả bốn. `--audit` 0 lỗi, 1 warning cũ. Mirror push `bf705fc`.
+
+🔴 **Lịch sử đáng nhớ:** cặp khoá này từng bị revert xuống 45/50 ngày 24/08 và
+gây bong bàn, phải khôi phục 60/60 ngày 25/08. Lần này khác — Viet chủ ý hạ 5°
+(60→55), không phải revert ngoài ý muốn, và mức hạ nhỏ hơn nhiều so với cú rơi
+15° từng gây lỗi. Vẫn đáng để ý dấu hiệu bong góc bàn ở bản in tới.
+
+
+### Bản in sau P26/P30 — mặt trên dư nhựa dạng chấm rải rác; P31 dò lại `retraction_length`
+
+Viet xác nhận: dư nhựa là **chấm nhỏ rải rác**, không phải dư đều cả mặt —
+khớp giả thuyết mỗi lần rút/bù lại (deretract) sau retract 1.8 mm hơi thừa,
+đúng chỗ dễ lộ khi `pressure_advance = 0.036` chưa hiệu chuẩn. Loại được giả
+thuyết tháp mồi — gcode xác nhận `purge_in_prime_tower = 1` (P30) hoạt động
+thật, purge chạy đúng tại toạ độ tháp (X~20-41), tách biệt vật lý khỏi model.
+
+**P31 🟢 áp** — dò xuống mức giữa 1.2 (cũ) và 1.8 (P26), theo Viet chọn 1.6
+thay vì 1.5 tôi đề xuất.
+
+Backup `user_backup-tune-set-20260830-132622`.
+
+| Key | Cũ | Mới |
+|---|---|---|
+| `retraction_length` | 1.8 | **1.6** |
+
+Đọc lại xác nhận. `--audit` 0 lỗi. Mirror push `8917e6f`.
+
+
+### P30 P26 🟢 áp
+
+Backup `user_backup-tune-set-20260830-122730`.
+
+| Preset | Key | Cũ | Mới |
+|---|---|---|---|
+| machine | `purge_in_prime_tower` | 0 *(kế thừa)* | **1** |
+| machine | `retraction_length` | 1.2 | **1.8** |
+
+Đọc lại xác nhận cả hai. `--audit` 0 lỗi, 1 warning cũ (top shell TEST 0.28,
+không liên quan). Mirror push `12ce145`.
+
+
+### Bản in 30/08 11:42 — tơ giảm rất nhiều; mặt trên tìm ra bằng chứng trực tiếp
+
+🟢 **Tơ giảm rất nhiều**, chỉ còn ở trụ nhỏ. Chưa áp P26 — cải thiện này đến từ
+tổ hợp P6/P15/P19/P27/P29 cộng với việc Viet luôn chọn lại filament trước khi
+in (A9), đảm bảo cả hai màu nhận đủ mọi fix thay vì một màu bị kẹt ở preset cũ.
+
+🔴 **Mặt trên vẫn có mảng thiếu nhựa lộ bên trong, ~1 cm².** Hỏi hai câu để loại
+giả thuyết: (1) mảng đó có nằm trên khoảng rỗng bên trong model không — Viet trả
+lời **không**; (2) vị trí có lặp lại cùng chỗ mỗi lần in không — **không**. Loại
+hẳn nguyên nhân model-geometry/bridging.
+
+**Đọc gcode bản in tại điểm đổi màu (`T1`, dòng 29818) tìm ra bằng chứng trực
+tiếp:**
+
+```
+;;; G1 E8 F300
+;;; M400 P3643
+;;; G1 E13 F1200
+;;; G1 E9.16733 F300     (x8 — các đường zig-zag của tháp mồi)
+...
+;;; G1 E-2 F1200
+```
+
+**Toàn bộ chuỗi purge sau khi đổi màu bị comment (`;;;`) — không đùn một giọt
+nhựa nào.** Không phải lỗi ghi file, slicer chủ động không phát các lệnh này.
+
+🔴 **Cơ chế:** `purge_in_prime_tower = 0` (machine, kế thừa hãng, chưa từng
+đụng — đã ghi nhận từ đầu là "an toàn, không đổi" nhưng chưa hiểu hết hệ quả).
+FIGURE đặt `flush_into_objects = 0`, `flush_into_infill = 0`, chỉ còn
+`flush_into_support = 1` — model này không dùng support
+(`enable_support = 0`). Ba đích xả đều vô hiệu, và `purge_in_prime_tower = 0`
+khoá luôn đường xả vào tháp mồi. Không còn chỗ nào nhận nhựa xả → slicer bỏ hẳn
+bước purge.
+
+Đầu in quay lại in model ngay sau đó với buồng nóng chảy **chưa được mồi lại**
+— vài mm đầu tiên có thể thiếu nhựa. Vị trí lỗi phụ thuộc layer nào trùng lúc
+đổi màu, nên ngẫu nhiên giữa các lần in — khớp đúng mô tả của Viet.
+
+Ghi thành **P30** — bật `purge_in_prime_tower = 1`, cho tháp mồi một đích xả
+đảm bảo bất kể model có support hay không. Theo mô tả Orca/BambuStudio, đây là
+lưới an toàn dự phòng ("chỉ dùng khi các đường xả khác không đủ"), không đổi
+hành vi TOOL/TEST vì chúng đã có đích xả hợp lệ (`flush_into_infill/objects = 1`).
+
+
+### P29 áp — trả nhiệt PLA Generic về 205; P27 chỉnh sâu hơn — 0.32 thay vì 0.36
+
+Backup `user_backup-tune-set-20260830-113318`.
+
+| Preset | Key | Cũ | Mới |
+|---|---|---|---|
+| `PLA Generic@KX 0.4` | `nozzle_temperature_HS` | 200 | **205** |
+| 3× FIGURE | `top_surface_line_width` | 0.36 | **0.32** |
+
+Đọc lại xác nhận cả bốn file. `--audit` 0 lỗi, 1 warning cũ (không liên quan).
+Mirror push `5660841`.
+
+🔵 0.32 mm = 80% đường kính nozzle — dưới mức 90% (0.36) áp hôm qua, Viet chủ
+động giảm sâu hơn sau khi 0.36 "đỡ hơn nhưng vẫn xấu". Ở 0.16 mm × 80 mm/s ×
+0.32 mm ≈ 4,1 mm³/s, còn xa trần flow 13.
+
+### A9 đóng — Viet xác nhận luôn chọn lại filament trước khi in
+
+Không còn nguy cơ project dùng preset đóng băng — Viet tự làm bước đồng bộ mỗi
+lần, không cần tôi nhắc nữa.
+
+
+### Phát hiện: project cũ dùng bản chụp preset đóng băng, không ăn theo thư viện
+
+Bản in 30/08 10:45 (project "keychain_Daniel", 2 màu: white + matcha, cả hai
+gán tên preset `PLA Generic@KX 0.4`). Đọc gcode phát hiện hai giá trị nhiệt
+khác nhau cho cùng một tên preset:
+
+```
+filament_settings_id = ["PLA Generic@KX 0.4", "PLA Generic@KX 0.4(keychain_Daniel.3mf)"]
+nozzle_temperature   = [200, 205]
+```
+
+Slot 1 (white) đọc đúng thư viện mới nhất (200, sau P28). Slot 2 (matcha) bị
+đóng băng ở bản chụp cũ hơn (205, trước P28 nhưng sau P15 vì flow_ratio đã là 1.0) — tên có hậu tố `(keychain_Daniel.3mf)`.
+
+🔴 **Cơ chế:** khi một object trong project được gán filament, slicer nhúng một
+bản sao cấu hình tại thời điểm đó vào file project. Sửa preset trong thư viện
+sau đó không tự lan sang những slot đã bị đóng băng kiểu này — im lặng, không
+cảnh báo.
+
+Ghi thành mục 7 mới trong `docs/preset-model.md` và A9 trong `TODO.md`. Cách
+sửa: chọn lại filament cho object đó trong UI để ép đồng bộ lại.
+
+🔴 Hệ quả: **P28 (hạ nhiệt PLA Generic xuống 200) chưa được kiểm đầy đủ** — chỉ
+một trong hai slot của bản in 30/08 thực sự chạy ở 200 °C.
+
+### Bản in 30/08 10:45 — tơ vẫn còn, mặt trên vẫn xấu
+
+Viet đổi cuộn mới (in slot 4) và báo: tơ không đổi, mặt trên "xước, thiếu nhựa"
+— đỡ hơn sau P27 (line width 0.36) nhưng vẫn xấu.
+
+🔴 **Tơ không đổi dù đã hạ nhiệt (P28).** Nhiệt độ không phải nghi phạm chính
+cho tơ trên máy này — củng cố thêm cho P26 (buồng nóng chảy 79 mm³ dùng chung,
+retraction_length có thể chưa đủ) thay vì tiếp tục hạ nhiệt.
+
+🔴 **Mặt trên xấu hơn có thể chính là do P28.** Nhiệt thấp hơn → nhựa chảy kém
+hơn → các đường mặt trên hoà vào nhau kém hơn → đúng chiều với "thiếu nhựa".
+Cùng lúc đó slot matcha lại KHÔNG chạy ở 200 (xem phát hiện trên) nên không thể
+kết luận chắc — nhưng đủ nghi để đề xuất trả về, tách biến.
+
+Ghi thành **P29**: trả `nozzle_temperature_HS` của `PLA Generic@KX 0.4` về 205,
+đóng thử nghiệm P28.
+
+
+### P27 P28 🟢 áp
+
+Backup `user_backup-tune-set-20260830-100417`.
+
+| Preset | Key | Cũ | Mới |
+|---|---|---|---|
+| 3× FIGURE | `top_surface_line_width` | 0.42 *(kế thừa)* | **0.36** |
+| `PLA Generic@KX 0.4` | `nozzle_temperature_HS` | 205 | **200** |
+
+Đọc lại xác nhận cả bốn file. `--audit` 0 lỗi, 1 warning cũ (top shell TEST
+0.28, không liên quan). Mirror push `f5de447`.
+
+🔵 `nozzle_temperature_initial_layer_HS` giữ nguyên 210 — chỉ hạ nhiệt in, chưa
+đụng lớp đầu.
+
+
+### P25-v2 🟢 áp
+
+Backup `user_backup-tune-p25v2-endgcode-order-20260830-095617`.
+
+```
+M400
+G91
+G1 E-6 F1800 ; P25v2 rut du truoc khi wipe, khop retract_before_wipe=100%
+G1 X3 Y3 F3000 ; P25v2 wipe - keo giot nhua khoi mui in
+G1 Z5 F600 ; P16 nhac dau in khoi mat in
+G90
+M140 S0 ; turn off heatbed
+M104 S0 ; turn off temperature
+M107;turn off fan
+M84; disable motors
+; disable stepper motors
+```
+
+Đọc lại xác nhận kiểu `str`, thứ tự đã đảo đúng: rút đủ 6 mm trước, wipe sau.
+`--audit` 0 lỗi.
+
+
+### Bản in 30/08 00:18 — P6 và P25 không đổi gì, kết quả âm thật
+
+Kiểm gcode trước khi kết luận: file `0830-0018-Plate 1(01)_PLA_0.16_26m8s`
+mang đúng cả hai — `retraction_minimum_travel = 0.5`, `machine_end_gcode` có
+khối wipe của P25 nguyên vẹn. `print_settings_id = Novi 0.16 - FIGURE @AC KX`,
+2 màu (matcha + white, `PLA Generic@KX 0.4`). Không phải trường hợp preset chưa
+kịp áp — đây là kết quả âm thật.
+
+🟢 Seam vẫn hết dư nhựa, không tái phát.
+
+🔴 **P25 sai thứ tự — tự nhận lỗi.** Viết lại làm rút nửa chừng (`E-2`) rồi mới
+wipe, rồi mới rút nốt (`E-4`) — ngược với `retract_before_wipe = 100%` mà mọi
+retract khác trong bản in đang dùng (rút đủ trước, wipe sau). Trong lúc wipe,
+đầu in mới rút 2/6 mm nên còn áp lực — nhiều khả năng chính là lý do giọt nhựa
+vẫn ứ ra. Ghi lại **P25-v2**: rút đủ 6 mm trước, rồi mới wipe.
+
+🔴 **Tơ không đổi sau P6** — ngưỡng travel hạ 1 → 0.5 mm không có tác dụng quan
+sát được. Cùng với P15 (retract 45, wipe 100%, z-hop Normal Lift) và P19
+(`reduce_crossing_wall`), gần như mọi khoá "chuẩn" cho stringing đã tinh chỉnh.
+Còn một khoá chưa từng động tới: `retraction_length = 1.2` mm, tăng đúng một
+lần từ 0.8 mm của hãng hôm 24/08.
+
+Ghi lại **P26** — tăng lên 1.8 mm. Lý lẽ: `nozzle_volume = 79` mm³ là buồng
+nóng chảy **dùng chung cho cả 4 màu** trên đầu 4-in-1, lớn hơn nhiều hotend
+đơn màu điển hình (15–20 mm³). Cảnh báo "retract > 2.0 mm là kiểu bowden" trong
+`docs/tool.md` được đặt ra cho hotend đơn màu — chưa chắc áp dụng đúng cho
+buồng chung to gấp 4–5 lần. 1.8 mm vẫn dưới ngưỡng cảnh báo đó.
+
+🟡 Bản in này lại dùng 2 màu — chưa cô lập được biến prime tower khỏi phép đo
+tơ. Nếu P25-v2 + P26 vẫn không hết, nên in 1 màu trước khi tìm nghi phạm khác.
+
+
+### P6 P25 🟢 áp
+
+Backup `user_backup-tune-set-20260830-001342` (P6),
+`user_backup-tune-p25-endgcode-wipe-20260830-001359` (P25).
+
+| Preset | Key | Cũ | Mới |
+|---|---|---|---|
+| machine | `retraction_minimum_travel` | 1 | **0.5** |
+| machine | `machine_end_gcode` | *(P16, không wipe)* | **+bước wipe 3 mm** |
+
+```
+M400
+G91
+G1 E-2 F1800 ; P25 rut mot phan truoc, giu it ap luc de wipe khong ray nhua
+G1 X3 Y3 F3000 ; P25 wipe - keo giot nhua khoi mui in
+G1 E-4 F1800 ; P25 rut not phan con lai
+G1 Z5 F600 ; P16 nhac dau in khoi mat in
+G90
+M140 S0 ; turn off heatbed
+M104 S0 ; turn off temperature
+M107;turn off fan
+M84; disable motors
+; disable stepper motors
+```
+
+Đã đọc lại xác nhận cả hai. `--audit` 0 lỗi. `--check-drift` báo lệch trước khi
+autocommit — đúng như kỳ vọng, vì vừa ghi xong chưa export; autocommit đã đồng
+bộ ngay sau.
+
+
+### Viet chỉnh tay trong slicer: brim auto, wall_loops 2, ironing tắt — cho cả 3 biến thể FIGURE
+
+Không phải thao tác của tôi, ghi lại theo yêu cầu "lưu lại nó". Đọc từ đĩa sau
+khi đóng slicer, áp dụng trên `Novi 0.12/0.16/0.20 - FIGURE @AC KX`:
+
+| Key | Trước | Giờ |
+|---|---|---|
+| `brim_type` | `brim_ears` | `auto_brim` *(= cha, khoá biến mất)* |
+| `wall_loops` | 4 | 2 *(= cha, khoá biến mất)* |
+| `ironing_type` | `top` | `no ironing` *(= cha, khoá biến mất)* |
+
+Cả ba khoá không còn override — trùng giá trị cha nên slicer tự bỏ, đúng cơ chế
+đã thấy nhiều lần (`sparse_infill_density` từng bỏ y hệt vậy hồi 25/08).
+
+🟡 Kéo theo hệ quả: `ironing_speed`, `ironing_spacing`, `ironing_inset` vẫn còn
+là override trên đĩa (0.12, 0.16) nhưng giờ là **khoá chết** — vô nghĩa khi
+`ironing_type = no ironing`. Giữ lại phòng khi bật ironing trở lại cho từng mẫu.
+
+🟡 Phát hiện thêm, không nằm trong ba thay đổi trên: `Novi 0.16 - FIGURE` có
+`top_shell_layers = 5`, chưa từng ghi trong tài liệu (từng ghi kế thừa 6/4).
+Không rõ đổi khi nào — hỏi Viet, chưa tự sửa.
+
+Đã cập nhật `profiles/process.md`.
+
+### Bản in test 30/08 — seam hết, tơ còn nhiều, nốt nhựa mới cuối bản in
+
+🟢 **Seam hết dư nhựa.** Không tách được công của cái nào trong: scarf tắt
+(P15, đã có từ trước), hay ba khoá vừa trả về mặc định ở trên (đổi ngay trước
+bản in này). Không cần hành động thêm trừ khi seam tái phát.
+
+🔴 **Tơ vẫn còn nhiều.** Đã có đủ `reduce_crossing_wall = 1` (P19),
+`retraction_speed = 45`, `retract_before_wipe = 100%`, `z_hop_types = Normal
+Lift` (P15) — ironing tắt nên loại được khả năng nhầm ironing artifact với tơ.
+Nghi phạm còn lại: [P6](PENDING_APPLY.md#p6) —
+`retraction_minimum_travel = 1` khiến bước nhảy ngắn hơn 1 mm không rút nhựa.
+Model FIGURE nhiều chi tiết nhỏ thì phần lớn travel giữa các đảo ngắn hơn
+ngưỡng đó. Ghi lại đề xuất `apply P6`, chờ Viet duyệt.
+
+🔴 **Lỗi mới: nốt nhựa dư ở điểm kết thúc bản in.** Khác triệu chứng cũ ở đầu
+bản in (A8, do macro `G9111` firmware, không sửa được). Cái này nằm trong
+`machine_end_gcode`, sửa được từ slicer.
+
+Cơ chế: mọi retract giữa bản in đều có một bước wipe đi kèm — nozzle di chuyển
+dọc travel kế tiếp để kéo giọt nhựa cuối ra khỏi mũi. Retract **cuối cùng** của
+cả bản in không có travel nào theo sau, nên không wipe được — giọt nhựa còn
+treo đúng tại điểm dừng. Không phải lỗi của P16 (retract + z-hop vẫn cần, C2 đã
+xác nhận); đây là khoảng trống P16 chưa che.
+
+Ghi thành P25 — chèn một bước wipe 3 mm vào giữa `machine_end_gcode`, tổng
+lượng rút giữ nguyên 6 mm. Chờ Viet duyệt.
+
 ## 2026-08-29
+
+### Slot 2 đã fix — in bình thường
+
+Viet xác nhận. Trả lời luôn câu hỏi treo từ vụ PA: cơ cấu nạp không hỏng, chỉ
+bài hiệu chuẩn thiếu `T` + bước mồi mới không ra nhựa. Không cần nghi phần cứng
+slot 2 nữa.
+
+### C2 🟢 đóng — P16 hoạt động tốt
+
+Retract 6 mm + nhấc Z ở `machine_end_gcode` xác nhận ổn, nozzle sạch cuối bản in.
+Giữ nguyên, không revert.
+
+### Nhựa thừa đầu bản in — nằm trong macro `G9111`, ngoài tầm sửa từ slicer
+
+Viet mô tả chi tiết trình tự lúc bắt đầu in:
+
+1. Đùn nhựa thải (purge mồi)
+2. Di chuyển đầu in tới vị trí wiper silicone, chấm xuống bàn — **trong lúc di
+   chuyển này, nhựa vẫn chảy ra khoảng 5 cm**, vướng vào bàn in
+3. Lau đầu in vào wiper
+4. Di chuyển tới điểm bắt đầu in — sau bước lau, **vẫn còn dư khoảng 1 cm** nhựa,
+   tiếp tục vướng bàn
+
+🔴 **Toàn bộ chuỗi trên chạy bên trong lệnh `G9111`** — dòng duy nhất còn lại
+trong `machine_start_gcode` sau khi gỡ P23/P24. Slicer không phát thêm lệnh nào
+khác trước đó. `G9111` là một macro Klipper định nghĩa trong `printer.cfg` **trên
+bo mạch máy in**, không phải file nào trong `%APPDATA%\AnycubicSlicerNext\`.
+
+❌ **Không sửa được từ đây.** Đúng như đã ghi ở kết luận cũ về "đầu bản in không
+sửa được từ slicer" — giờ có thêm chi tiết: không chỉ nhiệt độ nozzle đứng yên,
+mà cả trình tự purge → di chuyển → wipe → di chuyển đều do macro quyết định,
+gồm cả *quãng đường* và *có retract giữa các bước hay không*.
+
+Hai điểm rò rỉ khác nhau, đáng phân biệt khi báo cho Anycubic hoặc tìm cách sửa
+firmware:
+
+| Điểm | Mô tả | Khả năng |
+|---|---|---|
+| Purge → wiper (5 cm) | Không retract trước khi di chuyển, hoặc quãng đường quá dài so với tốc độ chảy tự nhiên | macro thiếu `G1 E-` trước lệnh travel |
+| Wiper → điểm in (1 cm) | Wipe xong không lau hết, hoặc thiếu retract sau lau | macro chưa bù đủ, hoặc do chính cơ chế lau (ép nhựa ra thêm) |
+
+📝 Đường duy nhất để sửa: `printer.cfg` trên máy — nằm ngoài phạm vi repo này
+(`docs/capabilities.md` mục 1: "Nói chuyện với máy in" đã chặn, giờ thêm rõ
+macro khởi động cũng cùng nhóm không truy cập được).
+
+
+### C4 🟢 — gỡ P23 và P24 khỏi `machine_start_gcode`
+
+Backup `user_backup-tune-c4-drop-startgcode-20260829-213824`.
+
+Cách gỡ: **xoá hẳn khoá `machine_start_gcode` khỏi user preset**, không khôi phục
+backup. Trước P23 preset không hề sở hữu khoá này — nó kế thừa từ hãng. Xoá khoá
+là trả về đúng trạng thái đó và **không đụng gì khác**; khôi phục backup thì sẽ
+kéo lùi cả P18, P19, P20, P21.
+
+Đã đọc lại giá trị hiệu dụng: 8 dòng gốc của hãng, không còn `T1`, không còn purge.
+
+Trạng thái machine preset sau khi gỡ:
+
+```
+retraction_length 1.2   retraction_speed 45   retract_before_wipe 100%
+z_hop 0.4   z_hop_types Normal Lift   retract_restart_extra 0
+retraction_minimum_travel 1   deretraction_speed 35
+machine_end_gcode  <- P16 con nguyen
+```
+
+### Hiệu chuẩn PA bỏ dở — tổng kết để không lặp lại
+
+Ba lần chạy, ba rào chắn khác nhau, không lần nào ra được số:
+
+| Lần | Rào | Sửa | Kết quả |
+|---|---|---|---|
+| 18:39 | gcode không có lệnh `T` nào — đầu 4-in-1 không gạt slot | P23 thêm `T1` | máy ra vài vệt mỏng |
+| 19:36 | không có bước mồi, đường dẫn 79 mm³ rỗng | P24 cách A: đổi process lấy `skirt_loops = 2` | 🔴 bộ sinh ép `skirt_loops = 0`, vô hiệu |
+| 21:08 | — | P24 cách B: purge 53 mm sợi trong start gcode | vẫn không ra nhựa |
+
+🔴 **Gcode ở lần cuối đã đúng** — kiểm bằng cách đọc file: có `T1`, có
+`G1 X120 Y12 E25 F300`, `E40`, `E53`. Lệnh đùn thật, không phải travel. Phía
+slicer hết chỗ sửa.
+
+Còn lại hai khả năng, **chỉ phân biệt được bằng cách nhìn máy**:
+
+- đầu in **có** chạy tới `Y = 12` kéo một đường mà không ra nhựa → cơ cấu nạp
+  slot 2 không ăn, lỗi máy
+- đầu in **không** chạy tới đó → máy in file cũ, không phải file vừa slice
+  *(file cuối 18m57s, các file trước 18m19s — phân biệt bằng thời gian trên máy)*
+
+📝 Tạm dừng A2. Quay lại nghiệm thu P19/P20/P21 bằng một bản in thật 1 màu — nó
+cũng trả lời gián tiếp việc slot 2 có nạp bình thường hay không, mà không tốn
+thêm một bài test hỏng.
+
+🔵 Ghi lại cho lần sau: **mọi bài hiệu chuẩn một-filament trên máy này đều thiếu
+cả `T` lẫn bước mồi.** Flow rate, temperature tower, retraction tower cũng vậy.
+Muốn dùng chúng thì phải dựng lại P23 + P24, và trước hết phải giải quyết được
+việc máy không đẩy nhựa.
+
+
+### P24 🟢 áp cách B — purge line trong `machine_start_gcode`
+
+Backup `user_backup-tune-p24-purge-20260829-204740`. Nối sau dòng `T1` của P23:
+
+```
+M82 ; P24 purge - absolute E, slicer set lai M83 ngay sau start gcode
+G90
+G92 E0
+G1 Z5 F600
+G1 X20 Y12 F6000
+G1 Z0.3 F600
+G1 X120 Y12 E25 F300 ; purge cham, lap day duong dan 79mm3
+G1 X235 Y12 E40 F900 ; keo dai, gat cuc nhua ra
+G1 X235 Y12.7 F6000
+G1 X20 Y12.7 E53 F1500 ; luot ve, lau sach
+G92 E0
+G1 Z5 F600 ; P24 purge het
+```
+
+53 mm sợi tổng cộng — thừa sức lấp 79 mm³ ≈ 33 mm của đường dẫn chung.
+
+🔵 `M82` an toàn vì slicer phát `G90/G21/M83` của nó **ngay sau** start gcode, ghi
+đè lại chế độ tương đối.
+
+🔵 Chạy ở `Y = 12`, ngoài vùng bài PA (`X 44–215, Y 100–143`), trong bàn 260 × 260.
+
+🟢 Lợi phụ: đường purge là **phép thử phần cứng**. Nó không ra nhựa nghĩa là vấn
+đề nằm ở máy hoặc firmware, không phải ở gcode slicer sinh ra.
+
+🔴 Thay đổi **tạm**, gỡ cùng lúc với `T1` — C4 trong `TODO.md`.
+
+
+### Cách A của P24 chết — bộ sinh bài PA ép `skirt_loops = 0`
+
+Đổi process sang `Novi 0.12 - FIGURE @AC KX` (preset đó giữ `skirt_loops = 2`)
+rồi chạy lại wizard lúc 20:17. Đọc gcode:
+
+```
+print_settings_id = Novi 0.12 - FIGURE @AC KX
+skirt_loops       = 0
+```
+
+🔴 Bộ sinh bài hiệu chuẩn **ghi đè** `skirt_loops` về 0 bất kể process nào đang
+chọn. Đổi process không có tác dụng.
+
+Còn lại đúng một đường: cách B của P24 — purge line trong `machine_start_gcode`.
+
+🔵 Ghi lại để không thử lại: **bài hiệu chuẩn của Orca không kế thừa
+`skirt_loops` từ process preset.** Mọi cách mồi nhựa phải nằm ngoài nó, tức trong
+`machine_start_gcode`.
+
+
+### P23 có tác dụng, nhưng bài PA vẫn thiếu nhựa — không có bước mồi
+
+Lần chạy 19:36 sau P23. Gcode có `T1` ✅ và máy **đã ra nhựa** — nhưng chỉ vài vệt
+rất mỏng ở viền, không đọc được dải nào.
+
+```
+; bài PA 19:36                     ; bản in thường
+T1                                 T0
+...                                ...
+G1 E1.2 F2100  <-- chỉ deretract   (prime tower / skirt in truoc)
+G1 X44.744 Y143.213 E2.23286       (da day nhua khi vao vat)
+```
+
+| | |
+|---|---|
+| Đường dẫn chung đầu 4-in-1 | `nozzle_volume = 79` mm³ ≈ **33 mm sợi** |
+| Khung viền bài PA đùn | ~22 mm sợi |
+
+Khung viền chưa đủ để **lấp đầy** đường dẫn, nói gì tới đắp lên bàn. Đúng triệu
+chứng "vài vệt mỏng như tơ ở viền".
+
+🔴 **Vì sao không có skirt:** bài hiệu chuẩn mượn process đang chọn ở cửa sổ chính
+— `Novi 0.16 - FIGURE @AC KX`, mà preset đó Viet cố ý để `skirt_loops = 0`
+(xem P22 đã đóng). `Novi 0.12 - FIGURE` vẫn giữ 2.
+
+Ghi thành P24, hai cách. Cách A không sửa preset nào: đổi process sang
+`Novi 0.12 - FIGURE @AC KX` rồi chạy wizard.
+
+🔵 Bài học: `skirt_loops = 0` là lựa chọn hợp lý cho bản in thật trên máy một
+màu, nhưng trên đầu 4-in-1 nó cũng bỏ luôn bước mồi sau mỗi lần đổi slot. Với bài
+hiệu chuẩn — chạy một filament, không prime tower — đó là bước mồi duy nhất còn lại.
+
+
+### P23 🟢 áp — `T1` vào cuối `machine_start_gcode`
+
+Backup `user_backup-tune-p23-startgcode-T1-20260829-193347`. Slot 2 (white,
+`PLA Generic@KX 0.4`) → `T1`.
+
+```
+...
+; first_layer_print_size = {first_layer_print_size[0]},{first_layer_print_size[1]}
+T1 ; P23 tam thoi - chon slot 2 (white, Generic) cho bai hieu chuan
+```
+
+Kiểu trên đĩa: `str` ✅. `--audit` 0 lỗi. Script có chốt chặn — thấy dòng `T` sẵn
+thì dừng, không nhân đôi.
+
+🔴 **Là thay đổi tạm.** Gỡ ngay sau khi đo xong PA. Để lâu thì mọi bản in nhiều
+màu bắt đầu bằng `T0`/`T2`/`T3` sẽ bị ép thêm một lần đổi màu vô ích ở đầu bản in.
+
+**Gỡ:** đóng slicer rồi khôi phục backup ở trên, hoặc xoá đúng dòng cuối.
+
+
+### Bài hiệu chuẩn PA chạy nhưng không ra nhựa — thiếu lệnh chọn slot
+
+Viet chạy Calibration → Pressure Advance. Máy chạy hết bài, không đùn tí nhựa nào.
+
+Đọc gcode `0829-1839-pa_pattern_100_2000_plate(01)_PLA_0.2_18m19s.gcode.3mf`:
+
+| File gcode | Số filament trong project | Lệnh `T` |
+|---|---|---|
+| PA pattern 18:39 | 1 | 🔴 **0** |
+| Bản in 2 màu 17:00 | 4 | `T0`, `T1` |
+| Bản 1 màu 14:35 | 4 | `T3` |
+| Bản 1 màu 09:32 | 2 | `T1` |
+
+🔴 **Mọi bản in bình thường đều có lệnh `T`, kể cả bản chỉ dùng một màu** — vì
+project của chúng khai nhiều filament. Bài hiệu chuẩn khai **đúng một** filament,
+slicer bỏ hẳn nhánh multi-material và không phát `T`. Đầu in 4-in-1 cần `T` để gạt
+cơ cấu chọn slot; không có nó thì motor đùn quay nhưng không slot nào nối vào
+đường nạp.
+
+So sánh cùng vị trí trong file:
+
+```
+; bản in thường            ; bài PA
+M83                        M83
+M900 K0.036                M900 K0.036
+T0            <-- có       (không có gì)
+M75                        M75
+```
+
+🟢 Phần còn lại của bài test hoàn toàn bình thường: 2105 đường đùn, 1444 mm nhựa,
+165 lệnh `M900` quét PA. Chỉ thiếu đúng một dòng.
+
+Ghi thành P23 — nối `T#` vào cuối `machine_start_gcode`, **tạm thời**, gỡ sau khi
+đo xong.
+
+🟡 Đây là hạn chế của máy 4-in-1 với bộ calibration kế thừa từ Orca: mọi bài
+hiệu chuẩn một-filament đều dính, không riêng PA. Flow rate, temperature tower,
+retraction tower cũng sẽ không ra nhựa nếu chạy như hiện tại.
+
+
+### 🔴 Máy khai `gcode_flavor = klipper` nhưng slicer phát `M900`, không phải `SET_PRESSURE_ADVANCE`
+
+Đọc gcode bản in 29/08:
+
+```
+M900 K0.036; Override pressure advance value
+```
+
+`SET_PRESSURE_ADVANCE` **không xuất hiện lần nào**. `M900 K` là lệnh Linear
+Advance của Marlin; Klipper **không** hiểu nó theo mặc định — phải có
+`[gcode_macro M900]` trong `printer.cfg` ánh xạ sang `SET_PRESSURE_ADVANCE`.
+
+🔴 Hệ quả: **chưa chắc máy có nghe `pressure_advance` của slicer hay không.** Nếu
+firmware Anycubic không định nghĩa macro M900 thì con số trong filament preset
+không có tác dụng gì, và PA thật là giá trị nằm trong `printer.cfg`.
+
+Điều đó khớp với việc seam vẫn dư nhựa qua nhiều lần chỉnh preset.
+
+📝 Phải kiểm trước khi hiệu chuẩn — xem A2 trong `TODO.md`. Cách kiểm: chạy bài
+PA Pattern; nếu **mọi dải trong bài test trông giống hệt nhau** thì máy đang bỏ
+qua lệnh, và hiệu chuẩn từ slicer là vô nghĩa.
+
+🔵 Bộ bài hiệu chuẩn có sẵn trong
+`C:\Program Files\AnycubicSlicerNext\resources\calib\` — `pressure_advance/`
+có ba mẫu: `pa_pattern.3mf`, `pressure_advance_test.stl`, `tower_with_seam.stl`.
+
 
 ### P19 P20 P21 🟢 áp
 
