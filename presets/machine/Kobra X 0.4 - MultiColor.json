@@ -3,11 +3,12 @@
         "35"
     ],
     "from": "User",
+    "high_current_on_filament_swap": "1",
     "inherits": "Anycubic Kobra X 0.4 nozzle",
     "is_custom_defined": "0",
     "name": "Kobra X 0.4 - MultiColor",
     "printer_settings_id": "Kobra X 0.4 - MultiColor",
-    "printer_timestamp": "2026-09-03 21:47:16",
+    "printer_timestamp": "2026-09-04 08:17:14",
     "retract_before_wipe": [
         "100%"
     ],

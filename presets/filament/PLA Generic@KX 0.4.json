@@ -1,11 +1,14 @@
 {
+    "filament_flow_ratio": [
+        "0.95"
+    ],
     "filament_retraction_length": [
         "nil"
     ],
     "filament_settings_id": [
         "PLA Generic@KX 0.4"
     ],
-    "filament_timestamp": "2026-09-03 21:50:07",
+    "filament_timestamp": "2026-09-04 10:30:33",
     "filament_vendor": [
         "Generic"
     ],
