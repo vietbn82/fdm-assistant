@@ -8,7 +8,7 @@
     "filament_settings_id": [
         "PLA Bambulab Lite@KX 0.4"
     ],
-    "filament_timestamp": "2026-09-09 20:09:56",
+    "filament_timestamp": "2026-09-10 16:27:44",
     "filament_vendor": [
         "BambuLab"
     ],
@@ -23,7 +23,7 @@
     "is_custom_defined": "0",
     "name": "PLA Bambulab Lite@KX 0.4",
     "nozzle_temperature_HS": [
-        "206"
+        "200"
     ],
     "nozzle_temperature_initial_layer_HS": [
         "210"
