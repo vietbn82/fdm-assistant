@@ -8,7 +8,7 @@
     "filament_settings_id": [
         "PLA Generic@KX 0.4"
     ],
-    "filament_timestamp": "2026-09-13 08:29:38",
+    "filament_timestamp": "2026-09-15 18:32:07",
     "filament_vendor": [
         "Generic"
     ],
@@ -20,10 +20,10 @@
     "is_custom_defined": "0",
     "name": "PLA Generic@KX 0.4",
     "nozzle_temperature_HS": [
-        "200"
+        "210"
     ],
     "nozzle_temperature_initial_layer_HS": [
-        "210"
+        "215"
     ],
     "nozzle_temperature_range_high": [
         "215"
