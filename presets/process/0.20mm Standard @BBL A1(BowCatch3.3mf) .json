@@ -1,0 +1,12 @@
+{
+    "compatible_printers": [
+        "Bambu Lab A1 0.4 nozzle"
+    ],
+    "from": "User",
+    "inherits": "0.20mm Standard @BBL A1(BowCatch3.3mf)",
+    "is_custom_defined": "0",
+    "name": "0.20mm Standard @BBL A1(BowCatch3.3mf) ",
+    "print_settings_id": "0.20mm Standard @BBL A1(BowCatch3.3mf) ",
+    "print_timestamp": "2026-09-21 16:04:50",
+    "version": "0.0.0.00"
+}
