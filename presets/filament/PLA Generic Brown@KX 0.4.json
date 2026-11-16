@@ -1,0 +1,41 @@
+{
+    "filament_cost": [
+        "130"
+    ],
+    "filament_flow_ratio": [
+        "0.98"
+    ],
+    "filament_retraction_length": [
+        "nil"
+    ],
+    "filament_settings_id": [
+        "PLA Generic Brown@KX 0.4"
+    ],
+    "filament_timestamp": "2026-10-28 10:49:53",
+    "filament_vendor": [
+        "Generic"
+    ],
+    "filament_wipe_distance": [
+        "nil"
+    ],
+    "from": "User",
+    "inherits": "Anycubic PLA @Anycubic Kobra X 0.4 nozzle",
+    "is_custom_defined": "0",
+    "name": "PLA Generic Brown@KX 0.4",
+    "nozzle_temperature_HS": [
+        "210"
+    ],
+    "nozzle_temperature_initial_layer_HS": [
+        "218"
+    ],
+    "nozzle_temperature_range_high": [
+        "220"
+    ],
+    "textured_plate_temp": [
+        "50"
+    ],
+    "textured_plate_temp_initial_layer": [
+        "55"
+    ],
+    "version": "1.3.2606.12"
+}

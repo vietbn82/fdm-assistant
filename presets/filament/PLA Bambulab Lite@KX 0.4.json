@@ -2,18 +2,30 @@
     "close_fan_the_first_x_layers": [
         "2"
     ],
+    "filament_cost": [
+        "180"
+    ],
+    "filament_flow_ratio": [
+        "0.98"
+    ],
     "filament_max_volumetric_speed": [
-        "11"
+        "12"
+    ],
+    "filament_retract_when_changing_layer": [
+        "1"
     ],
     "filament_retraction_length": [
-        "nil"
+        "1.4"
     ],
     "filament_settings_id": [
         "PLA Bambulab Lite@KX 0.4"
     ],
-    "filament_timestamp": "2026-09-16 09:31:03",
+    "filament_timestamp": "2026-11-15 14:39:00",
     "filament_vendor": [
         "BambuLab"
+    ],
+    "filament_wipe": [
+        "1"
     ],
     "filament_wipe_distance": [
         "nil"
@@ -25,17 +37,20 @@
     "inherits": "Anycubic PLA @Anycubic Kobra X 0.4 nozzle",
     "is_custom_defined": "0",
     "name": "PLA Bambulab Lite@KX 0.4",
+    "nozzle_temperature_HS": [
+        "203"
+    ],
     "nozzle_temperature_initial_layer_HS": [
         "210"
     ],
     "nozzle_temperature_range_high": [
-        "212"
+        "213"
+    ],
+    "pressure_advance": [
+        "0.04"
     ],
     "textured_plate_temp": [
         "50"
-    ],
-    "textured_plate_temp_initial_layer": [
-        "55"
     ],
     "version": "1.3.2606.12"
 }

@@ -1,0 +1,15 @@
+{
+    "compatible_printers": [
+        "Bambu Lab X1 Carbon 0.4 nozzle",
+        "Bambu Lab X1 0.4 nozzle",
+        "Bambu Lab P1S 0.4 nozzle",
+        "Bambu Lab X1E 0.4 nozzle"
+    ],
+    "from": "User",
+    "inherits": "0.20mm Standard @BBL X1C(SEDO+2.5.3mf)",
+    "is_custom_defined": "0",
+    "name": "0.20mm Standard @BBL X1C(SEDO+2.5.3mf)3",
+    "print_settings_id": "0.20mm Standard @BBL X1C(SEDO+2.5.3mf)3",
+    "print_timestamp": "2026-09-22 20:08:04",
+    "version": "0.0.0.00"
+}

@@ -1,0 +1,14 @@
+{
+    "filament_settings_id": [
+        "PETG Bambulab @KX 0.4"
+    ],
+    "filament_timestamp": "2026-10-07 15:35:17",
+    "filament_vendor": [
+        "Bambulab"
+    ],
+    "from": "User",
+    "inherits": "Anycubic PETG @KX 0.4",
+    "is_custom_defined": "0",
+    "name": "PETG Bambulab @KX 0.4",
+    "version": "1.3.2609.02"
+}
