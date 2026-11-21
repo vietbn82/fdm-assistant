@@ -151,7 +151,7 @@
         "nil"
     ],
     "filament_max_volumetric_speed": [
-        "11"
+        "10"
     ],
     "filament_minimal_purge_on_wipe_tower": [
         "15"
@@ -222,7 +222,7 @@
     "filament_start_gcode": [
         "; filament start gcode"
     ],
-    "filament_timestamp": "2026-10-16 10:10:21",
+    "filament_timestamp": "2026-11-21 08:33:59",
     "filament_toolchange_delay": [
         "0"
     ],
@@ -279,7 +279,7 @@
         "230"
     ],
     "nozzle_temperature_HS": [
-        "225"
+        "230"
     ],
     "nozzle_temperature_initial_layer": [
         "240"
