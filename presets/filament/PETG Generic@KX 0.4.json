@@ -135,7 +135,7 @@
         "; filament end gcode\n"
     ],
     "filament_flow_ratio": [
-        "0.96"
+        "0.945"
     ],
     "filament_id": "GFPETG",
     "filament_is_support": [
@@ -222,7 +222,7 @@
     "filament_start_gcode": [
         "; filament start gcode"
     ],
-    "filament_timestamp": "2026-11-22 19:33:45",
+    "filament_timestamp": "2026-11-25 14:58:57",
     "filament_toolchange_delay": [
         "0"
     ],
@@ -279,7 +279,7 @@
         "230"
     ],
     "nozzle_temperature_HS": [
-        "230"
+        "225"
     ],
     "nozzle_temperature_initial_layer": [
         "230"
@@ -288,7 +288,7 @@
         "230"
     ],
     "nozzle_temperature_initial_layer_HS": [
-        "240"
+        "235"
     ],
     "nozzle_temperature_range_high": [
         "245"
