@@ -151,7 +151,7 @@
         "nil"
     ],
     "filament_max_volumetric_speed": [
-        "10"
+        "8"
     ],
     "filament_minimal_purge_on_wipe_tower": [
         "15"
@@ -222,7 +222,7 @@
     "filament_start_gcode": [
         "; filament start gcode"
     ],
-    "filament_timestamp": "2026-11-26 07:39:49",
+    "filament_timestamp": "2026-11-26 10:52:18",
     "filament_toolchange_delay": [
         "0"
     ],
@@ -288,7 +288,7 @@
         "230"
     ],
     "nozzle_temperature_initial_layer_HS": [
-        "235"
+        "230"
     ],
     "nozzle_temperature_range_high": [
         "245"
@@ -297,7 +297,7 @@
         "220"
     ],
     "overhang_fan_speed": [
-        "100"
+        "90"
     ],
     "overhang_fan_threshold": [
         "50%"
@@ -306,7 +306,7 @@
         "0.4157"
     ],
     "pressure_advance": [
-        "0.038"
+        "0.04"
     ],
     "reduce_fan_stop_start_freq": [
         "1"
@@ -348,7 +348,7 @@
         "40"
     ],
     "textured_plate_temp": [
-        "70"
+        "75"
     ],
     "textured_plate_temp_initial_layer": [
         "75"
