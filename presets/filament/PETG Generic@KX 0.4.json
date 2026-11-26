@@ -222,7 +222,7 @@
     "filament_start_gcode": [
         "; filament start gcode"
     ],
-    "filament_timestamp": "2026-11-25 14:58:57",
+    "filament_timestamp": "2026-11-26 07:39:49",
     "filament_toolchange_delay": [
         "0"
     ],
@@ -306,7 +306,7 @@
         "0.4157"
     ],
     "pressure_advance": [
-        "0.036"
+        "0.038"
     ],
     "reduce_fan_stop_start_freq": [
         "1"
