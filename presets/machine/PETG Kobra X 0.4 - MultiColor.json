@@ -6,9 +6,9 @@
     "high_current_on_filament_swap": "1",
     "inherits": "Anycubic Kobra X 0.4 nozzle",
     "is_custom_defined": "0",
-    "name": "Kobra X 0.4 - MultiColor",
-    "printer_settings_id": "Kobra X 0.4 - MultiColor",
-    "printer_timestamp": "2026-11-15 11:11:00",
+    "name": "PETG Kobra X 0.4 - MultiColor",
+    "printer_settings_id": "PETG Kobra X 0.4 - MultiColor",
+    "printer_timestamp": "2026-11-26 22:03:22",
     "retract_before_wipe": [
         "100%"
     ],
@@ -22,5 +22,5 @@
         "45"
     ],
     "version": "1.3.2608.20",
-    "z_offset": "0.04"
+    "z_offset": "0.02"
 }
